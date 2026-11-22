@@ -10,6 +10,9 @@ import { sanitizerPolicy } from './src/render/sanitize'
 
 const src = (f: string): string => resolve(import.meta.dirname, 'src', f)
 
+/** Interface languages besides the built-in English, each its own entry (`@lamka02sk/proza/locales/sk`). */
+const LOCALES = ['sk', 'cs', 'de', 'es', 'fr', 'hu']
+
 /**
  * Library mode inlines every asset as a data: URL, and a font as data: needs `font-src data:`
  * in the host's CSP. The fonts are emitted as files instead, addressed from the module.
@@ -53,7 +56,10 @@ export default defineConfig({
     // Fonts stay files: a data: URL would need `font-src data:` in the host's CSP.
     assetsInlineLimit: 0,
     lib: {
-      entry: { index: src('index.ts'), render: src('render-entry.ts'), element: src('element.ts'), vue: src('vue.ts') },
+      entry: {
+        index: src('index.ts'), render: src('render-entry.ts'), element: src('element.ts'), vue: src('vue.ts'),
+        ...Object.fromEntries(LOCALES.map((l) => [`locales/${l}`, src(`locales/${l}.ts`)])),
+      },
       formats: ['es'],
     },
     rolldownOptions: {

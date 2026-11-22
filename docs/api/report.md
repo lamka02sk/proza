@@ -198,6 +198,7 @@ interface CreateEditorOptions {
         readonly rehostImages?: boolean;
     };
     readonly locale?: string | Locale;
+    readonly languages?: readonly Locale[];
     readonly label?: string;
     readonly colorScheme?: 'light' | 'dark' | 'auto';
     readonly dir?: 'ltr' | 'rtl';
@@ -1415,6 +1416,42 @@ const ProzaEditor: import("vue").DefineComponent<import("vue").ExtractPropTypes<
     options: Omit<CreateEditorOptions, "target" | "content">;
     modelValue: string | StoredDoc | null;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, true, {}, any>;
+```
+
+## `@lamka02sk/proza/locales/sk`
+
+```ts
+const sk: Locale;
+```
+
+## `@lamka02sk/proza/locales/cs`
+
+```ts
+const cs: Locale;
+```
+
+## `@lamka02sk/proza/locales/de`
+
+```ts
+const de: Locale;
+```
+
+## `@lamka02sk/proza/locales/es`
+
+```ts
+const es: Locale;
+```
+
+## `@lamka02sk/proza/locales/fr`
+
+```ts
+const fr: Locale;
+```
+
+## `@lamka02sk/proza/locales/hu`
+
+```ts
+const hu: Locale;
 ```
 
 ## Referenced declarations

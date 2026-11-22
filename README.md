@@ -1,4 +1,9 @@
-<p><img src="brand/svg/proza-logo-na-svetle.svg" alt="Proza" height="56"></p>
+<p>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/svg/proza-logo-na-tmave.svg">
+    <img src="brand/svg/proza-logo-na-svetle.svg" alt="Proza" height="56">
+  </picture>
+</p>
 
 Proza is a block editor for the web, in the spirit of WordPress's Gutenberg. You put it on a page like a `<textarea>`, authors write in blocks, and you store the result as JSON. The same JSON renders to clean HTML in the browser or on your server.
 
@@ -31,7 +36,7 @@ const html = render(storedJson, coreRegistry)
 - **Accessibility built in**: full keyboard use, screen reader announcements, and a checker that helps authors fix missing alt text, skipped headings, vague links and missing captions.
 - **Safe by default**: pasted HTML, imported files and stored JSON are validated, output goes through an allow-list, and it runs under a strict Content Security Policy (no `unsafe-inline`, no `unsafe-eval`). The allow-list also ships as JSON for sanitisers in PHP, Python or Rust.
 - **Extensible**: your own block types, formats, commands, toolbar buttons, embed providers and checker rules.
-- **English and Slovak** interface, and you can add your own language.
+- **English, Slovak, Czech, German, Spanish, French and Hungarian** interface, each language a separate import so you ship only the ones you use, and you can add your own.
 
 It works in the last two versions of Chrome, Edge, Firefox and Safari, and on iOS Safari 17 and later.
 

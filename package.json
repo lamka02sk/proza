@@ -1,6 +1,6 @@
 {
   "name": "@lamka02sk/proza",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Block-based WYSIWYG editor, written from scratch.",
   "keywords": [
     "editor",
@@ -46,6 +46,30 @@
     "./vue": {
       "types": "./dist/types/vue.d.ts",
       "import": "./dist/lib/vue.js"
+    },
+    "./locales/sk": {
+      "types": "./dist/types/locales/sk.d.ts",
+      "import": "./dist/lib/locales/sk.js"
+    },
+    "./locales/cs": {
+      "types": "./dist/types/locales/cs.d.ts",
+      "import": "./dist/lib/locales/cs.js"
+    },
+    "./locales/de": {
+      "types": "./dist/types/locales/de.d.ts",
+      "import": "./dist/lib/locales/de.js"
+    },
+    "./locales/es": {
+      "types": "./dist/types/locales/es.d.ts",
+      "import": "./dist/lib/locales/es.js"
+    },
+    "./locales/fr": {
+      "types": "./dist/types/locales/fr.d.ts",
+      "import": "./dist/lib/locales/fr.js"
+    },
+    "./locales/hu": {
+      "types": "./dist/types/locales/hu.d.ts",
+      "import": "./dist/lib/locales/hu.js"
     },
     "./content.css": "./dist/lib/content.css",
     "./sanitizer-policy.json": "./dist/lib/sanitizer-policy.json",

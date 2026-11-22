@@ -72,7 +72,7 @@ test.describe('find and replace', () => {
   })
 })
 
-test('special characters and emoji: search in either language, insert at the caret, recently used first', async ({ page }) => {
+test('special characters and emoji: search, insert at the caret, recently used first', async ({ page }) => {
   // Axe over the dialog and the emoji grid take 15 s in Firefox alone, past 30 s with the whole suite running.
   test.setTimeout(60_000)
   await open(page, [para('Price 20', 'a')])
@@ -94,17 +94,30 @@ test('special characters and emoji: search in either language, insert at the car
   // The caret is after it, and typing goes on.
   await page.keyboard.type('!')
   expect(await outline(page)).toEqual(['paragraph: Price 20€!'])
-  // Emoji, searched by a Slovak word in the English interface; arrows move through the grid.
+  // Emoji, searched by a keyword; arrows move through the grid.
   await more(page, 'characters')
   await dialog.getByRole('button', { name: 'Emoji' }).click()
   await expect(dialog.getByRole('option').first()).toBeVisible()
-  await search.fill('mačka')
+  await search.fill('kitten')
   await expect(dialog.getByRole('option', { name: 'cat face' })).toBeVisible()
   await search.fill('')
   await expect(dialog.getByText('Used recently')).toBeVisible()
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('Escape')
   await expect(dialog).toBeHidden()
+})
+
+test('special characters in another interface language: its names, found by its words and by English ones', async ({ page }) => {
+  await open(page, [para('Kočka', 'a')], '?locale=cs')
+  await caret(page, 'a', 5)
+  await more(page, 'characters')
+  const dialog = page.getByRole('dialog', { name: 'Speciální znaky a emoji' })
+  await dialog.getByRole('button', { name: 'Emoji' }).click()
+  const search = dialog.getByRole('combobox', { name: 'Hledat podle názvu' })
+  await search.fill('koťátko')
+  await expect(dialog.getByRole('option', { name: 'hlava kočky' })).toBeVisible()
+  await search.fill('cat face')
+  await expect(dialog.getByRole('option', { name: 'hlava kočky' })).toBeVisible()
 })
 
 test('date or time and the non-breaking space type at the caret', async ({ page }) => {

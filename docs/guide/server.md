@@ -35,7 +35,7 @@ const registry = blockRegistry([...coreSchemas, callout])
 render(storedJson, registry)
 ```
 
-Options: `formats` (the inline formats, when plugins add some), `labels` (the published page's few words: `renderLabels('sk')` for Slovak, English by default), `idPrefix` (footnote ids, when several documents share a page), `measure` (the text column and wide widths in pixels, for pictures' `sizes`), `highlight` (pass `tokenize` from `@lamka02sk/proza/render` to colour code), `rawHtml` (below).
+Options: `formats` (the inline formats, when plugins add some), `labels` (the published page's few words: `renderLabels('sk')` for Slovak; also `cs`, `de`, `es`, `fr`, `hu`; English by default), `idPrefix` (footnote ids, when several documents share a page), `measure` (the text column and wide widths in pixels, for pictures' `sizes`), `highlight` (pass `tokenize` from `@lamka02sk/proza/render` to colour code), `rawHtml` (below).
 
 ## Store the JSON, not the HTML
 

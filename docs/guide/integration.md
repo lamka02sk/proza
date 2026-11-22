@@ -12,12 +12,13 @@ Proza needs Vue 3 and Reka UI, which install with it. A bundler (Vite, webpack, 
 
 ```ts
 import { createEditor } from '@lamka02sk/proza'
+import { sk } from '@lamka02sk/proza/locales/sk'
 
 const proza = createEditor({
   target: '#content',   // an element, or a selector
   content: storedJson,  // stored JSON, or legacy HTML (it goes through the importer)
   label: 'Article',     // the editor's accessible name; a form label works too
-  locale: 'sk',         // 'en' (default), 'sk', or a full set of strings
+  locale: sk,           // 'en' (default), or a Locale: import { sk } from '@lamka02sk/proza/locales/sk'
 })
 
 proza.editor.getJSON()  // the document to store
@@ -45,12 +46,13 @@ Three ways, all of which submit with the form, reset with it, and take `required
 
 ```html
 <!-- 2. A custom element, form-associated through ElementInternals. -->
-<proza-editor name="body" locale="sk" required>
+<proza-editor name="body" locale="sk" required>  <!-- sk listed in languages below -->
   <script type="application/json">{"version":1,"blocks":[]}</script>
 </proza-editor>
 <script type="module">
   import { defineEditorElement } from '@lamka02sk/proza/element'
-  defineEditorElement({ upload })   // options that are not text
+  import { sk } from '@lamka02sk/proza/locales/sk'
+  defineEditorElement({ upload, languages: [sk] })   // options that are not text, and the languages `locale` can name
 </script>
 ```
 
@@ -60,10 +62,11 @@ Attributes: `name`, `required`, `readonly`, `disabled`, `preset`, `locale`, `lab
 <!-- 3. Vue. The model is the stored JSON. -->
 <script setup lang="ts">
 import { ProzaEditor } from '@lamka02sk/proza/vue'
+import { sk } from '@lamka02sk/proza/locales/sk'
 const doc = ref(stored)
 </script>
 <template>
-  <ProzaEditor v-model="doc" :options="{ locale: 'sk', upload }" @save="store" />
+  <ProzaEditor v-model="doc" :options="{ locale: sk, upload }" @save="store" />
 </template>
 ```
 
@@ -78,7 +81,8 @@ Everything `createEditor` takes. Only `target` is required.
 | `import` | | `classes`: host classes that mean a format or a block. `rehostImages`: store pictures from other sites through `upload`. |
 | `output` | `both` | What an enhanced textarea holds: `json`, `html` or `both`. |
 | `preset` | `full` | What the interface offers: `basic`, `standard`, `full`, or `{ blocks, formats }`. Content outside the preset still loads and renders. |
-| `locale` | `en` | `en`, `sk`, or a full `Locale`. |
+| `locale` | `en` | `en`, a `Locale` (`@lamka02sk/proza/locales/sk`, `cs`, `de`, `es`, `fr`, `hu`), or the `lang` of one in `languages`. |
+| `languages` | | Locales `locale` can name, for the element's `locale` attribute (see [languages](theming.md#languages)). |
 | `label` | form label | Accessible name of the editor. |
 | `contentLanguage` | the locale's | Language of the content (BCP 47) when it differs from the interface's: the published page's few words (footnotes, table names) and the checker's language. |
 | `colorScheme` | `auto` | `light`, `dark` or `auto` (follows the system). |

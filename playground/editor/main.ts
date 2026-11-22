@@ -4,6 +4,12 @@
  */
 import '../shared/playground.css'
 import { type BlocksChangeEvent, createEditor, type ProzaEditor, type UploadAdapter, type UploadEvent } from '../../src/index'
+import { cs } from '../../src/locales/cs'
+import { de } from '../../src/locales/de'
+import { es } from '../../src/locales/es'
+import { fr } from '../../src/locales/fr'
+import { hu } from '../../src/locales/hu'
+import { sk } from '../../src/locales/sk'
 import { library } from './library'
 import { demoPlugin } from './plugin'
 import type { Editor } from '../../src/editor/editor'
@@ -107,6 +113,7 @@ const proza = createEditor({
   target: '#editor',
   content,
   locale: params.get('locale') ?? 'en',
+  languages: [sk, cs, de, es, fr, hu],
   label: 'Content',
   colorScheme: theme === 'dark' || theme === 'light' ? theme : 'auto',
   ...(dir === 'rtl' || dir === 'ltr' ? { dir } : {}),

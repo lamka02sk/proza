@@ -37,7 +37,7 @@ if (!failed) ok(`package: ${files.length} files, ${(packed.size / 1024).toFixed(
 // Node has `navigator` since 21; the editor reads it only when called.
 for (const g of ['window', 'document', 'HTMLElement', 'customElements']) if (g in globalThis) fail(`Node has a ${g} global; the check needs a plain Node`)
 const entry = (name) => import(join(root, 'dist/lib', `${name}.js`))
-for (const name of ['index', 'render', 'element', 'vue']) {
+for (const name of ['index', 'render', 'element', 'vue', ...['sk', 'cs', 'de', 'es', 'fr', 'hu'].map((l) => `locales/${l}`)]) {
   try { await entry(name); ok(`import ${name === 'index' ? pkg.name : `${pkg.name}/${name}`} in Node`) } catch (e) { fail(`import ${name} in Node: ${e.message}`) }
 }
 const r = await entry('render')

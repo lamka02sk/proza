@@ -14,7 +14,6 @@ import { Editor } from './editor/editor'
 import type { RequestAttachment, UploadAdapter } from './editor/upload'
 import type { EditorEvents } from './editor/editor'
 import { en } from './editor/locale-en'
-import { sk } from './editor/locale-sk'
 import type { Strings } from './editor/strings'
 import type { FieldShortcut } from './richtext/field'
 import contentCss from './render/content.css?inline'
@@ -30,7 +29,6 @@ import { ALLOWED } from './render/html'
 import type { InspectorPanel, ToolbarItem } from './ui/context'
 import { registerFonts } from './ui/fonts'
 import { uiEn } from './ui/locale-en'
-import { uiSk } from './ui/locale-sk'
 import { EditorRoot } from './ui/root'
 import type { UiStrings } from './ui/strings'
 
@@ -89,7 +87,7 @@ export interface ProzaPlugin {
   readonly inspector?: readonly InspectorPanel[]
   /** More parse rules for block types already installed, by type. */
   readonly importRules?: Readonly<Record<string, readonly ParseRule[]>>
-  /** Strings by language: `en`, `sk` or a host's own. */
+  /** Strings by language (`en`, `sk`, `cs`, …): the editor takes its language's, or English. */
   readonly locales?: Readonly<Record<string, LocaleExtension>>
   /** Embed providers the plugin allows (`registerEmbedProvider`). */
   readonly embeds?: readonly EmbedProvider[]
@@ -114,7 +112,19 @@ function extendLocale(base: Locale, ext: LocaleExtension | undefined): Locale {
   return { ...merge(base, core), ui: ui ? merge(base.ui, ui) : base.ui }
 }
 
-export const locales: Readonly<Record<string, Locale>> = { en: { ...en, ui: uiEn }, sk: { ...sk, ui: uiSk } }
+/** The built-in locale. Other languages are their own entries (`@lamka02sk/proza/locales/sk`), so a host bundles only what it uses. */
+export const locales: Readonly<Record<string, Locale>> = { en: { ...en, ui: uiEn } }
+
+/** `sk-SK` takes `sk`. An unknown name throws: the other languages are imports, and English in their place would hide that. */
+function resolveLocale(locale: string | Locale | undefined, languages: readonly Locale[]): Locale {
+  if (typeof locale === 'object') return locale
+  const name = (locale ?? 'en').toLowerCase()
+  const primary = name.split('-')[0] ?? name
+  const all = [...languages, locales.en!]
+  const found = all.find((l) => l.lang.toLowerCase() === name) ?? all.find((l) => l.lang.toLowerCase().split('-')[0] === primary)
+  if (!found) throw new Error(`Proza: no locale ${locale ?? ''}. Import it from @lamka02sk/proza/locales/${primary} and pass it as locale, or list it in languages.`)
+  return found
+}
 
 /** What a form field holds: HTML, the stored JSON, or HTML with the JSON beside it as `<name>_json`. */
 export type Output = 'json' | 'html' | 'both'
@@ -157,8 +167,13 @@ export interface CreateEditorOptions {
    * stored through `upload` (re-hosting; the other site must allow it).
    */
   readonly import?: { readonly classes?: Readonly<Record<string, ClassMapping>>; readonly rehostImages?: boolean }
-  /** `en`, `sk`, or a full set of strings. */
+  /**
+   * The interface language: `en` (built in), a `Locale` imported from
+   * `@lamka02sk/proza/locales/<lang>` (`sk`, `cs`, `es`, `fr`), or the `lang` of one in `languages`.
+   */
   readonly locale?: string | Locale
+  /** Locales `locale` can name, for the `locale` attribute of `<proza-editor>`: `defineEditorElement({ languages: [sk, cs] })`. */
+  readonly languages?: readonly Locale[]
   /** Accessible name of the editor; normally the host form's label text. */
   readonly label?: string
   /** `auto` follows the system (default). Colours themselves come from the `--pz-*` custom properties. */
@@ -311,7 +326,7 @@ function mount(host: HTMLElement, options: CreateEditorOptions): ProzaEditor {
   if (hostCss) { hostSheet = new CSSStyleSheet(); hostSheet.replaceSync(hostCss) }
   shadow.adoptedStyleSheets = [sheet, ...(palette ? [paletteSheet(palette)] : []), ...(hostSheet ? [hostSheet] : [])]
   const plugins = options.plugins ?? []
-  const base = typeof options.locale === 'object' ? options.locale : locales[options.locale ?? 'en'] ?? locales.en!
+  const base = resolveLocale(options.locale, options.languages ?? [])
   const locale = plugins.reduce((l, p) => extendLocale(l, p.locales?.[l.lang] ?? p.locales?.en), base)
   const { ui, ...strings } = locale
   for (const p of plugins) for (const e of p.embeds ?? []) registerEmbedProvider(e)

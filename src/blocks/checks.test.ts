@@ -100,9 +100,13 @@ describe('links and text', () => {
     expect(rules([p('see  now', [link(4, 5)])])).toEqual(['link-empty'])
     expect(rules([p('Read more.', [link(0, 9)])])).toEqual(['link-vague'])
     expect(rules([p('Kliknite sem', [link(0, 12)])])).toEqual(['link-vague'])
+    for (const t of ['Klikněte zde', 'Leer más', 'En savoir plus', 'Plus d’informations…', 'Kattintson ide']) expect(rules([p(t, [link(0, t.length)])])).toEqual(['link-vague'])
     expect(rules([p('https://x.test/a', [link(0, 16)])])).toEqual(['link-url'])
     expect(rules([p('The prices', [link(0, 10, { href: 'https://x.test', target: '_blank' })])])).toEqual(['link-new-window'])
     expect(rules([p('The prices (opens in a new window)', [link(0, 34, { href: 'https://x.test', target: '_blank' })])])).toEqual([])
+    for (const t of ['Ceny (otevře se v novém okně)', 'Precios (se abre en una nueva pestaña)', 'Les prix (nouvelle fenêtre)', 'Az árak (új ablakban)']) {
+      expect(rules([p(t, [link(0, t.length, { href: 'https://x.test', target: '_blank' })])])).toEqual([])
+    }
     const buttons = (attrs: Record<string, unknown>): Raw => b('core/buttons', {}, [b('core/button', { href: 'https://x.test', ...attrs })])
     expect(rules([buttons({ text: rich('Click here'), newWindow: true })])).toEqual(['link-vague', 'link-new-window'])
   })

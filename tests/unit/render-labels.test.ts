@@ -7,7 +7,7 @@ const table = { version: 1, blocks: [{ type: 'core/table', attrs: {}, children: 
 describe('words of the published page', () => {
   it('follow the content language, by its primary tag', () => {
     expect(render(table, coreRegistry, { labels: renderLabels('sk-SK') })).toContain('aria-label="Tabuľka"')
-    expect(render(table, coreRegistry, { labels: renderLabels('de') })).toContain('aria-label="Table"')
+    expect(render(table, coreRegistry, { labels: renderLabels('ja') })).toContain('aria-label="Table"')
     expect(renderLabels('sk').fileMeta('PDF', 1_200_000)).toBe('PDF, 1,2 MB')
   })
 })

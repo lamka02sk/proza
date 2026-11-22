@@ -2,6 +2,18 @@
 
 Proza follows [semantic versioning](https://semver.org). The public API is what [`docs/api/report.md`](docs/api/report.md) lists. Stored documents carry their own version and always load in later releases.
 
+## 0.1.1 (2026-11-22)
+
+### Languages
+
+- Czech, German, Spanish, French and Hungarian interfaces, beside English and Slovak: the editor, the published page's words (`renderLabels`), the checker's vague-link and new-window words, and the character picker's names.
+- **Breaking:** only English is built in. Every other language is its own entry, `@lamka02sk/proza/locales/<lang>`, so a host bundles only what it imports. Replace `locale: 'sk'` with `import { sk } from '@lamka02sk/proza/locales/sk'` and `locale: sk`. For `<proza-editor locale="sk">`, list it: `defineEditorElement({ languages: [sk] })`. An unknown locale name now throws instead of falling back to English.
+- `languages` option: the locales `locale` can name.
+
+### Fixes
+
+- The README logo shows on GitHub's dark theme.
+
 ## 0.1.0 (2026-11-22)
 
 First public release.

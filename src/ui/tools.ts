@@ -357,22 +357,34 @@ interface GlyphGroup { readonly id: string; readonly kind: 'characters' | 'emoji
 
 const fold = (s: string): string => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 
-/** The picker's data, parsed once: a lazy chunk, loaded when the picker first opens. */
-let loading: Promise<readonly GlyphGroup[]> | null = null
+/** Character names in the interface languages besides English, each a lazy chunk (scripts/gen-characters.mjs). */
+const LOCAL_NAMES: Readonly<Record<string, () => Promise<{ readonly NAMES: Readonly<Record<string, string>> }>>> = {
+  sk: () => import('./characters-sk'), cs: () => import('./characters-cs'), de: () => import('./characters-de'),
+  es: () => import('./characters-es'), fr: () => import('./characters-fr'), hu: () => import('./characters-hu'),
+}
+
+/** The picker's data, parsed once per language: lazy chunks, loaded when the picker first opens. */
+const loading = new Map<string, Promise<readonly GlyphGroup[]>>()
 function loadGlyphs(lang: string): Promise<readonly GlyphGroup[]> {
-  loading ??= import('./characters-data').then(({ CHARACTERS, EMOJI }) => {
+  const primary = lang.toLowerCase().split('-')[0] ?? ''
+  let p = loading.get(primary)
+  if (p) return p
+  const local = LOCAL_NAMES[primary]?.().then((m) => m.NAMES) ?? Promise.resolve<Readonly<Record<string, string>>>({})
+  p = Promise.all([import('./characters-data'), local]).then(([{ CHARACTERS, EMOJI }, names]) => {
     const parse = (kind: GlyphGroup['kind'], data: Readonly<Record<string, readonly string[]>>): GlyphGroup[] =>
       Object.entries(data).map(([id, list]) => ({
         id, kind,
         glyphs: list.map((e) => {
-          const [ch = '', en = '', sk = '', enWords = '', skWords = ''] = e.split('|')
-          // Both languages search: an English name works in the Slovak interface too.
-          return { ch, name: lang === 'sk' ? sk : en, words: fold(`${en} ${sk} ${enWords} ${skWords}`), names: [fold(en), fold(sk)] }
+          const [ch = '', en = '', enWords = ''] = e.split('|')
+          const [name = '', words = ''] = names[ch]?.split('|') ?? []
+          // Both languages search: an English name works in another interface too.
+          return { ch, name: name || en, words: fold(`${en} ${name} ${enWords} ${words}`), names: [fold(en), fold(name)] }
         }),
       }))
     return [...parse('characters', CHARACTERS), ...parse('emoji', EMOJI)]
   })
-  return loading
+  loading.set(primary, p)
+  return p
 }
 
 /**

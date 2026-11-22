@@ -59,6 +59,16 @@ A variant is a class, `pz-style-<name>`, offered as Style in the part's options 
 
 ## Languages
 
-The interface ships English (`en`) and Slovak (`sk`). Pass `locale: 'sk'`, or a full `Locale` for another language: start from the exported `locales.en` and translate every string; TypeScript lists what is missing. Plugins add their own strings per language (see [plugins](plugins.md)).
+English (`en`) is built in. Slovak, Czech, German, Spanish, French and Hungarian are entries of their own, so a page pays only for the languages it imports:
+
+```ts
+import { cs } from '@lamka02sk/proza/locales/cs'   // also sk, de, es, fr, hu
+
+createEditor({ target: '#content', locale: cs })
+```
+
+To pick by name (the `locale` attribute of `<proza-editor>`, or a language from the page), list the imported ones in `languages`: `defineEditorElement({ languages: [sk, cs] })`, then `<proza-editor locale="cs">`. A regional tag such as `cs-CZ` takes `cs`. A name that matches no listed locale throws.
+
+For another language, pass a full `Locale`: start from the exported `locales.en` and translate every string; TypeScript lists what is missing. Plugins add their own strings per language (see [plugins](plugins.md)).
 
 The interface follows the locale's direction; `dir: 'rtl'` sets it. Each text field takes its direction from its first strong character, and authors can mark the language of a passage.

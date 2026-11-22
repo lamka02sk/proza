@@ -1,11 +1,12 @@
 // Generates src/ui/characters-data.ts: the special characters and emoji of the
-// character picker (as TinyMCE `charmap` and `emoticons`), with
-// English and Slovak names and search words from Unicode CLDR.
+// character picker (as TinyMCE `charmap` and `emoticons`), with English names
+// and search words from Unicode CLDR, and src/ui/characters-<lang>.ts with each
+// other interface language's names and words, a lazy chunk of its own.
 //
 //   node scripts/gen-characters.mjs
 //
 // Sources (Unicode License v3, https://www.unicode.org/license.txt):
-// emoji-test.txt, UnicodeData.txt, CLDR annotations (en, sk; full and derived).
+// emoji-test.txt, UnicodeData.txt, CLDR annotations (full and derived).
 // Emoji stop at version 15.0, the newest that the supported operating systems
 // (iOS 17, current Android and Windows) all draw.
 import { writeFileSync } from 'node:fs'
@@ -28,12 +29,16 @@ const annotations = async (lang) => {
   return { ...derived, ...full }
 }
 
-const [emojiTest, unicodeData, en, sk] = await Promise.all([
+// The interface languages besides English (src/locales/).
+const LANGS = ['sk', 'cs', 'de', 'es', 'fr', 'hu']
+
+const [emojiTest, unicodeData, en, ...others] = await Promise.all([
   text('https://unicode.org/Public/emoji/latest/emoji-test.txt'),
   text('https://unicode.org/Public/UCD/latest/ucd/UnicodeData.txt'),
   annotations('en'),
-  annotations('sk'),
+  ...LANGS.map(annotations),
 ])
+const local = Object.fromEntries(LANGS.map((l, i) => [l, others[i]]))
 
 const unicodeNames = new Map()
 for (const line of unicodeData.split('\n')) {
@@ -41,22 +46,34 @@ for (const line of unicodeData.split('\n')) {
   if (cp && name && !name.startsWith('<')) unicodeNames.set(String.fromCodePoint(parseInt(cp, 16)), name.toLowerCase())
 }
 
-// CLDR names no spaces and few typographic marks in Slovak.
-const SK_NAMES = {
-  '\u00A0': 'nezlomiteľná medzera', '\u202F': 'úzka nezlomiteľná medzera', '\u2009': 'úzka medzera', '\u2002': 'polovičná medzera',
-  '\u2003': 'široká medzera', '\u200B': 'medzera nulovej šírky', '\u2060': 'spájač slov', '\u00AD': 'mäkký spojovník',
-  '‑': 'nezlomiteľný spojovník', '‣': 'trojuholníková odrážka',
+// CLDR names no spaces and few typographic marks outside English. In order:
+// no-break, narrow no-break, thin, en and em space, zero width space, word joiner,
+// soft hyphen, non-breaking hyphen, triangular bullet.
+const MARKS = ['\u00A0', '\u202F', '\u2009', '\u2002', '\u2003', '\u200B', '\u2060', '\u00AD', '‑', '‣']
+const MARK_NAMES = {
+  sk: ['nezlomiteľná medzera', 'úzka nezlomiteľná medzera', 'úzka medzera', 'polovičná medzera', 'široká medzera', 'medzera nulovej šírky', 'spájač slov', 'mäkký spojovník', 'nezlomiteľný spojovník', 'trojuholníková odrážka'],
+  cs: ['nezlomitelná mezera', 'úzká nezlomitelná mezera', 'úzká mezera', 'půlčtverčíková mezera', 'čtverčíková mezera', 'mezera nulové šířky', 'spojovač slov', 'měkký spojovník', 'nezlomitelný spojovník', 'trojúhelníková odrážka'],
+  de: ['geschütztes Leerzeichen', 'schmales geschütztes Leerzeichen', 'schmales Leerzeichen', 'Halbgeviert-Leerzeichen', 'Geviert-Leerzeichen', 'breitenloses Leerzeichen', 'Wortverbinder', 'weiches Trennzeichen', 'geschützter Bindestrich', 'dreieckiger Aufzählungspunkt'],
+  es: ['espacio de no separación', 'espacio estrecho de no separación', 'espacio fino', 'espacio de media eme', 'espacio eme', 'espacio de ancho cero', 'unión de palabras', 'guion blando', 'guion de no separación', 'viñeta triangular'],
+  fr: ['espace insécable', 'espace fine insécable', 'espace fine', 'espace demi-cadratin', 'espace cadratin', 'espace sans chasse', 'gluon de mots', 'trait d’union conditionnel', 'trait d’union insécable', 'puce triangulaire'],
+  hu: ['nem törhető szóköz', 'keskeny nem törhető szóköz', 'vékony szóköz', 'n-szóköz', 'm-szóköz', 'nulla szélességű szóköz', 'szóösszekötő', 'feltételes elválasztójel', 'nem törhető kötőjel', 'háromszög alakú felsorolásjel'],
 }
 
 // CLDR keys drop the emoji presentation selector; look both up.
 const note = (ann, ch) => ann[ch] ?? ann[ch.replace(/️/g, '')]
 const clean = (s) => s.replace(/[|\n]/g, ' ').trim()
+const words = (list, name) => (list ?? []).map(clean).filter((w) => w !== name).slice(0, KEYWORDS).join(' ')
+const englishName = (ch, fallback) => clean(note(en, ch)?.tts?.[0] ?? fallback ?? unicodeNames.get(ch) ?? '')
+// Each language's names by character: name|words, for every character the picker lists.
+const names = Object.fromEntries(LANGS.map((l) => [l, {}]))
 function entry(ch, fallback) {
-  const e = note(en, ch), s = note(sk, ch)
-  const enName = clean(e?.tts?.[0] ?? fallback ?? unicodeNames.get(ch) ?? '')
-  const skName = clean(SK_NAMES[ch] ?? s?.tts?.[0] ?? enName)
-  const words = (list, name) => (list ?? []).map(clean).filter((w) => w !== name).slice(0, KEYWORDS).join(' ')
-  return [ch, enName, skName, words(e?.default, enName), words(s?.default, skName)].join('|')
+  const enName = englishName(ch, fallback)
+  for (const l of LANGS) {
+    const a = note(local[l], ch), i = MARKS.indexOf(ch)
+    const name = clean(i >= 0 ? MARK_NAMES[l][i] : a?.tts?.[0] ?? '')
+    if (name || a?.default) names[l][ch] = `${name}|${words(a?.default, name)}`
+  }
+  return [ch, enName, words(note(en, ch)?.default, enName)].join('|')
 }
 
 // --- Emoji: fully-qualified, no skin tones (one tile per emoji), grouped as Unicode groups them.
@@ -94,7 +111,7 @@ const CHARACTERS = {
 const lines = [
   '// Generated by scripts/gen-characters.mjs: do not edit. Data: Unicode emoji-test.txt, UnicodeData.txt',
   '// and CLDR annotations, under the Unicode License v3 (https://www.unicode.org/license.txt).',
-  '// Each entry: character|English name|Slovak name|English words|Slovak words.',
+  '// Each entry: character|English name|English words. Other languages: characters-<lang>.ts.',
   '',
   'export const CHARACTERS: Readonly<Record<string, readonly string[]>> = {',
   ...Object.entries(CHARACTERS).map(([id, chars]) => `  ${id}: ${JSON.stringify(chars.map((c) => entry(c)))},`),
@@ -108,3 +125,14 @@ const lines = [
 const out = resolve(import.meta.dirname, '../src/ui/characters-data.ts')
 writeFileSync(out, lines.join('\n'))
 console.log(`${out}: ${Object.values(CHARACTERS).flat().length} characters, ${[...emoji.values()].flat().length} emoji`)
+for (const l of LANGS) {
+  const file = resolve(import.meta.dirname, `../src/ui/characters-${l}.ts`)
+  writeFileSync(file, [
+    '// Generated by scripts/gen-characters.mjs: do not edit. Data: CLDR annotations, under the Unicode License v3',
+    '// (https://www.unicode.org/license.txt). By character: name|words.',
+    '',
+    `export const NAMES: Readonly<Record<string, string>> = ${JSON.stringify(names[l])}`,
+    '',
+  ].join('\n'))
+  console.log(`${file}: ${Object.keys(names[l]).length} names`)
+}

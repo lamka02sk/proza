@@ -36,7 +36,11 @@ function decodeURIComponentSafe(s: string): string {
 const VAGUE = new Set([
   'click', 'click here', 'here', 'this', 'this link', 'link', 'more', 'read more', 'learn more', 'see more', 'more info', 'more information', 'details', 'continue', 'go', 'info',
   'tu', 'sem', 'tuto', 'kliknite', 'kliknite sem', 'kliknite tu', 'klikni sem', 'klikni tu', 'viac', 'čítať viac', 'čítajte viac', 'čítať ďalej', 'viac informácií', 'odkaz', 'tento odkaz', 'pokračovať', 'ďalej', 'podrobnosti',
-  'zde', 'klikněte zde', 'klikni zde', 'více', 'číst dále', 'hier', 'klicken sie hier', 'mehr', 'weiterlesen',
+  'zde', 'tady', 'klikněte zde', 'klikněte sem', 'klikni zde', 'klikni sem', 'více', 'číst dál', 'číst dále', 'více informací', 'tento odkaz', 'pokračovat', 'dále', 'podrobnosti',
+  'aquí', 'aqui', 'haz clic aquí', 'haga clic aquí', 'pulsa aquí', 'clic aquí', 'este enlace', 'enlace', 'más', 'leer más', 'ver más', 'más información', 'saber más', 'detalles', 'continuar', 'seguir leyendo',
+  'ici', 'cliquez ici', 'clique ici', 'ce lien', 'lien', 'plus', 'lire la suite', 'en savoir plus', 'voir plus', 'plus d informations', 'détails', 'continuer', 'suite',
+  'itt', 'ide', 'kattints ide', 'kattintson ide', 'kattints itt', 'kattintson itt', 'ez a link', 'link', 'tovább', 'bővebben', 'részletek', 'további információ', 'tovább olvasom', 'olvass tovább', 'folytatás',
+  'hier', 'klicken sie hier', 'hier klicken', 'klick hier', 'dieser link', 'mehr', 'weiterlesen', 'mehr erfahren', 'mehr lesen', 'mehr informationen', 'weitere informationen', 'details', 'weiter',
 ])
 
 /** Link text such as "click here" or "read more". */
@@ -49,7 +53,7 @@ export function isAddress(text: string): boolean {
   return /^(?:https?:\/\/|www\.)\S+$/i.test(text.trim())
 }
 
-const NEW_WINDOW = /new (?:window|tab)|nov[éoá]\w* (?:okn|kart)|neue[sm]? (?:fenster|tab)|nov[éá]\w* (?:okn|panel)/i
+const NEW_WINDOW = /new (?:window|tab)|nov[éoá]\w* (?:okn|kart)|neue[sm]? (?:fenster|tab)|nov[éáý]\w* (?:okn|panel)|nuev[ao] (?:ventana|pestaña)|nouv(?:el|elle)s? (?:fenêtre|onglet)|új (?:ablak|lap)/i
 
 /** The link text tells the reader it opens a new window (WCAG 3.2.5, G201). */
 export function declaresNewWindow(text: string): boolean {
