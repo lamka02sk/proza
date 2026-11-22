@@ -1,0 +1,8 @@
+/* Worst cases seen in the wild: !important everywhere and broad id selectors. */
+#app * { font-family: "Comic Sans MS", cursive !important; line-height: 3 !important; }
+#app p { display: inline !important; margin: 40px !important; color: red !important; text-transform: uppercase !important; }
+#app button { display: none !important; }
+#app [contenteditable] { white-space: normal !important; -webkit-user-modify: read-only !important; user-select: none !important; }
+#app proza-editor { color: red !important; font-size: 30px !important; visibility: visible !important; }
+#app strong { font-weight: 100 !important; }
+#app a { color: lime !important; text-decoration: none !important; }

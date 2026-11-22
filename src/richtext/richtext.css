@@ -1,0 +1,25 @@
+/* The rich-text field. Loaded by the editor and the playground. */
+.pz-richtext {
+  white-space: pre-wrap;      /* spaces are real spaces: no &nbsp; juggling */
+  overflow-wrap: anywhere;
+  min-block-size: 1lh;
+  caret-color: currentColor;
+}
+.pz-richtext:focus-visible {
+  outline: 2px solid var(--pz-focus, #1a5fb4);
+  outline-offset: 2px;
+}
+
+/* Footnote numbers run through the whole canvas, in reading order, as the renderer numbers them. */
+:root, :host { counter-reset: pz-fn; }
+.pz-richtext .pz-fn { counter-increment: pz-fn; cursor: default; }
+.pz-richtext .pz-fn::after { content: counter(pz-fn); }
+
+/* An inline picture sits on the text line and never overflows the field. */
+.pz-richtext img { max-inline-size: 100%; block-size: auto; vertical-align: text-bottom; }
+
+/* The link or code the next typed character joins (format boundaries). */
+::highlight(pz-boundary) { background-color: var(--pz-boundary, rgba(26, 95, 180, 0.16)); }
+@media (forced-colors: active) {
+  ::highlight(pz-boundary) { background-color: Highlight; color: HighlightText; }
+}

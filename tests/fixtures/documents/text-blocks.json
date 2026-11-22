@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "blocks": [
+    { "id": "h1", "type": "core/heading", "attrs": { "level": 1, "content": { "text": "Proza & friends", "formats": [] }, "anchor": "top" } },
+    { "id": "p1", "type": "core/paragraph", "attrs": { "content": { "text": "Bold, italic and a link.\nSecond line.", "formats": [
+      { "type": "bold", "start": 0, "end": 4 },
+      { "type": "italic", "start": 6, "end": 12 },
+      { "type": "bold", "start": 6, "end": 9 },
+      { "type": "link", "start": 19, "end": 23, "attrs": { "href": "https://example.com/?a=1&b=2" } }
+    ] } } },
+    { "id": "p2", "type": "core/paragraph", "attrs": { "content": { "text": "Centred, in Slovak.", "formats": [] }, "textAlign": "center", "lang": "sk" } },
+    { "id": "p3", "type": "core/paragraph", "attrs": { "content": { "text": "مرحبا", "formats": [] }, "lang": "ar", "dir": "rtl", "textAlign": "start" } },
+    { "id": "p4", "type": "core/paragraph", "attrs": { "content": { "text": "", "formats": [] } } },
+    { "id": "h2", "type": "core/heading", "attrs": { "level": 2, "content": { "text": "H2O and x2", "formats": [
+      { "type": "subscript", "start": 1, "end": 2 }, { "type": "superscript", "start": 9, "end": 10 }
+    ] } } },
+    { "id": "l1", "type": "core/list", "attrs": { "style": "bullet" }, "children": [
+      { "id": "l1a", "type": "core/list-item", "attrs": { "content": { "text": "One", "formats": [] } }, "children": [] },
+      { "id": "l1b", "type": "core/list-item", "attrs": { "content": { "text": "Two", "formats": [] } }, "children": [
+        { "id": "l2", "type": "core/list", "attrs": { "style": "number", "numbering": "a" }, "children": [
+          { "id": "l2a", "type": "core/list-item", "attrs": { "content": { "text": "Two a", "formats": [] } }, "children": [] }
+        ] }
+      ] }
+    ] },
+    { "id": "l3", "type": "core/list", "attrs": { "style": "number", "start": 3, "reversed": true }, "children": [
+      { "id": "l3a", "type": "core/list-item", "attrs": { "content": { "text": "Three", "formats": [] } }, "children": [] }
+    ] },
+    { "id": "l4", "type": "core/list", "attrs": { "style": "check" }, "children": [
+      { "id": "l4a", "type": "core/list-item", "attrs": { "content": { "text": "Done", "formats": [] }, "checked": true }, "children": [] },
+      { "id": "l4b", "type": "core/list-item", "attrs": { "content": { "text": "Open", "formats": [] }, "checked": false }, "children": [] }
+    ] },
+    { "id": "q1", "type": "core/quote", "attrs": { "citation": { "text": "Someone", "formats": [] } }, "children": [
+      { "id": "q1p", "type": "core/paragraph", "attrs": { "content": { "text": "A quotation.", "formats": [] } } }
+    ] },
+    { "id": "q2", "type": "core/quote", "attrs": {}, "children": [
+      { "id": "q2p", "type": "core/paragraph", "attrs": { "content": { "text": "No citation.", "formats": [] } } }
+    ] },
+    { "id": "c1", "type": "core/code", "attrs": { "language": "ts", "content": { "text": "if (a < b && c) {\n  return '<b>'\n}", "formats": [] } } },
+    { "id": "pre1", "type": "core/preformatted", "attrs": { "content": { "text": "\n  indented\nline", "formats": [{ "type": "bold", "start": 3, "end": 11 }] } } },
+    { "id": "s1", "type": "core/separator", "attrs": {} }
+  ]
+}

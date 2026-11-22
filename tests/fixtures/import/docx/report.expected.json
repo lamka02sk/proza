@@ -1,0 +1,392 @@
+{
+  "source": "docx",
+  "blocks": [
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Annual report",
+          "formats": []
+        },
+        "level": 1,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Summary",
+          "formats": []
+        },
+        "level": 1,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Revenue grew by twelve per cent, see the accounts.￼",
+          "formats": [
+            {
+              "type": "bold",
+              "start": 16,
+              "end": 22
+            },
+            {
+              "type": "link",
+              "start": 37,
+              "end": 49,
+              "attrs": {
+                "href": "https://example.com/accounts"
+              }
+            },
+            {
+              "type": "footnote",
+              "start": 50,
+              "end": 51,
+              "attrs": {
+                "note": "Audited figures."
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "bullet",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "North",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": [
+            {
+              "type": "core/list",
+              "attrs": {
+                "style": "bullet",
+                "numbering": "1",
+                "start": 1,
+                "reversed": false,
+                "anchor": "",
+                "lang": "",
+                "dir": "",
+                "size": "",
+                "color": ""
+              },
+              "children": [
+                {
+                  "type": "core/list-item",
+                  "attrs": {
+                    "content": {
+                      "text": "Coast",
+                      "formats": []
+                    },
+                    "checked": false,
+                    "lang": "",
+                    "dir": ""
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "South",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/quote",
+      "attrs": {
+        "citation": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/paragraph",
+          "attrs": {
+            "content": {
+              "text": "Quoted line",
+              "formats": [
+                {
+                  "type": "italic",
+                  "start": 0,
+                  "end": 11
+                }
+              ]
+            },
+            "anchor": "",
+            "textAlign": "",
+            "lang": "",
+            "dir": "",
+            "size": "",
+            "color": ""
+          }
+        }
+      ]
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "",
+        "alt": "A bar chart of sales",
+        "decorative": false,
+        "width": "l",
+        "naturalWidth": 0,
+        "naturalHeight": 0,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "",
+        "bleed": ""
+      }
+    },
+    {
+      "type": "core/table",
+      "attrs": {
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "mode": "scroll",
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "bleed": ""
+      },
+      "children": [
+        {
+          "type": "core/table-row",
+          "attrs": {},
+          "children": [
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "Year",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            },
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "Sales",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "core/table-row",
+          "attrs": {},
+          "children": [
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "2026",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            },
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "12",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Prepared by the team.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    }
+  ],
+  "report": [
+    {
+      "code": "style",
+      "severity": "changed",
+      "count": 1,
+      "samples": [
+        "Fancy Style"
+      ]
+    },
+    {
+      "code": "footnote",
+      "severity": "info",
+      "count": 1,
+      "samples": []
+    },
+    {
+      "code": "image-upload",
+      "severity": "info",
+      "count": 1,
+      "samples": []
+    }
+  ],
+  "pending": [
+    {
+      "name": "picture-1.png",
+      "file": {
+        "name": "picture-1.png",
+        "type": "image/png",
+        "size": 3369
+      }
+    }
+  ]
+}

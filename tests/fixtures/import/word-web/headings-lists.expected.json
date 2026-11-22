@@ -1,0 +1,227 @@
+{
+  "source": "word-web",
+  "blocks": [
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Meeting notes",
+          "formats": []
+        },
+        "level": 2,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "We agreed on three things and one open question",
+          "formats": [
+            {
+              "type": "bold",
+              "start": 13,
+              "end": 18
+            },
+            {
+              "type": "italic",
+              "start": 30,
+              "end": 33
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "bullet",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Budget",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": [
+            {
+              "type": "core/list",
+              "attrs": {
+                "style": "bullet",
+                "numbering": "1",
+                "start": 1,
+                "reversed": false,
+                "anchor": "",
+                "lang": "",
+                "dir": "",
+                "size": "",
+                "color": ""
+              },
+              "children": [
+                {
+                  "type": "core/list-item",
+                  "attrs": {
+                    "content": {
+                      "text": "Travel",
+                      "formats": []
+                    },
+                    "checked": false,
+                    "lang": "",
+                    "dir": ""
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Hiring",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "number",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Send the minutes",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Book the room",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "",
+        "alt": "Seating plan",
+        "decorative": false,
+        "width": "s",
+        "naturalWidth": 0,
+        "naturalHeight": 0,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "",
+        "bleed": ""
+      }
+    }
+  ],
+  "report": [
+    {
+      "code": "color",
+      "severity": "lost",
+      "count": 2,
+      "samples": [
+        "rgb(47, 84, 150)"
+      ]
+    },
+    {
+      "code": "image-missing",
+      "severity": "lost",
+      "count": 1,
+      "samples": [
+        "2f0e9a3c-1111-4b8e-9c3c-0123456789ab"
+      ]
+    },
+    {
+      "code": "tracked",
+      "severity": "changed",
+      "count": 2,
+      "samples": []
+    },
+    {
+      "code": "font",
+      "severity": "changed",
+      "count": 4,
+      "samples": [
+        "Segoe UI",
+        "Calibri Light",
+        "Calibri",
+        "verdana"
+      ]
+    },
+    {
+      "code": "size",
+      "severity": "changed",
+      "count": 1,
+      "samples": []
+    }
+  ],
+  "pending": [
+    {
+      "name": "2f0e9a3c-1111-4b8e-9c3c-0123456789ab",
+      "file": null
+    }
+  ]
+}

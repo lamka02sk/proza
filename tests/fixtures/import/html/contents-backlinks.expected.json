@@ -1,0 +1,252 @@
+{
+  "source": "html",
+  "blocks": [
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Contents",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "bullet",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Introduction",
+              "formats": [
+                {
+                  "type": "link",
+                  "start": 0,
+                  "end": 12,
+                  "attrs": {
+                    "href": "#introduction"
+                  }
+                }
+              ]
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Usage",
+              "formats": [
+                {
+                  "type": "link",
+                  "start": 0,
+                  "end": 5,
+                  "attrs": {
+                    "href": "#usage"
+                  }
+                }
+              ]
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Introduction",
+          "formats": [
+            {
+              "type": "link",
+              "start": 0,
+              "end": 12,
+              "attrs": {
+                "href": "#id1"
+              }
+            }
+          ]
+        },
+        "level": 1,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "The first paragraph of the introduction.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "The second paragraph of the introduction.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Usage",
+          "formats": [
+            {
+              "type": "link",
+              "start": 0,
+              "end": 5,
+              "attrs": {
+                "href": "#id2"
+              }
+            }
+          ]
+        },
+        "level": 1,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "How to use it.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "number",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "toc",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "More",
+              "formats": [
+                {
+                  "type": "link",
+                  "start": 0,
+                  "end": 4,
+                  "attrs": {
+                    "href": "#more"
+                  }
+                }
+              ]
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "More",
+          "formats": [
+            {
+              "type": "link",
+              "start": 0,
+              "end": 4,
+              "attrs": {
+                "href": "#toc"
+              }
+            }
+          ]
+        },
+        "level": 2,
+        "anchor": "more",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "A contents list whose headings link back to it.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    }
+  ],
+  "report": [],
+  "pending": []
+}

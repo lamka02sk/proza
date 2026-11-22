@@ -1,0 +1,82 @@
+{
+  "source": "html",
+  "blocks": [
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "A page that loads its pictures late.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "https://images.example.org/harbour.jpg",
+        "alt": "The harbour at dawn",
+        "decorative": false,
+        "width": "l",
+        "naturalWidth": 800,
+        "naturalHeight": 600,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "",
+        "bleed": ""
+      }
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "https://images.example.org/lighthouse.jpg",
+        "alt": "A lighthouse",
+        "decorative": false,
+        "width": "l",
+        "naturalWidth": 0,
+        "naturalHeight": 0,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "",
+        "bleed": ""
+      }
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "https://images.example.org/boat.jpg",
+        "alt": "A boat",
+        "decorative": false,
+        "width": "l",
+        "naturalWidth": 0,
+        "naturalHeight": 0,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "",
+        "bleed": ""
+      }
+    }
+  ],
+  "report": [],
+  "pending": []
+}

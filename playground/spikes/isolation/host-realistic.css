@@ -1,0 +1,23 @@
+/*
+ * What real host pages ship: a utility-framework preflight, a component
+ * framework reboot, and a CMS theme that styles by id. Nothing here targets
+ * the editor on purpose.
+ */
+*, ::before, ::after { box-sizing: border-box; border: 0 solid; margin: 0; padding: 0; }
+html { line-height: 1.5; -webkit-text-size-adjust: 100%; font-family: "Helvetica Neue", Arial, sans-serif; }
+button { font: inherit; color: inherit; background-color: transparent; text-transform: none; }
+a { color: #0d6efd; text-decoration: none; }
+a:hover { text-decoration: underline; }
+p { margin-bottom: 1rem; }
+strong, b { font-weight: bolder; }
+code { font-family: Consolas, monospace; color: #d63384; font-size: .875em; }
+[contenteditable]:focus { outline: none; }
+
+/* CMS theme */
+body { font-size: 14px; color: #444444; background: #f7f7f7; }
+#content { font-size: 13px; line-height: 2; letter-spacing: .02em; }
+#content p { font-size: 13px; line-height: 2; color: #444444; margin: 0 0 24px; text-align: justify; }
+#content a { color: purple; border-bottom: 1px dotted purple; }
+#content button { text-transform: uppercase; padding: 12px 24px; background: #333333; color: #ffffff; letter-spacing: .1em; }
+.wrapper div { position: relative; }
+.entry-content strong { font-weight: 600; color: #000000; }

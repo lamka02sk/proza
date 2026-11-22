@@ -1,0 +1,16 @@
+/*
+ * The same styles, defended the way a light-DOM editor can be: a revert
+ * reset and raised specificity. It still loses to host selectors with an id
+ * and to !important, which is what the spike measures.
+ */
+.pz-root.pz-root, .pz-root.pz-root * { all: revert; }
+.pz-root.pz-root.pz-root { display: block; font: 16px/1.5 system-ui, sans-serif; color: #121214; background: #ffffff; box-sizing: border-box; text-align: start; }
+.pz-root.pz-root *, .pz-root.pz-root *::before, .pz-root.pz-root *::after { box-sizing: inherit; }
+.pz-root.pz-root .pz-toolbar { display: flex; gap: 4px; padding: 4px; margin: 0; border: 1px solid #d9d6cf; }
+.pz-root.pz-root .pz-button { font: inherit; padding: 4px 8px; margin: 0; border: 1px solid #d9d6cf; border-radius: 4px; background: #ffffff; color: #121214; text-transform: none; letter-spacing: normal; min-block-size: 32px; }
+.pz-root.pz-root .pz-content { display: block; font: 18px/1.6 Georgia, serif; color: #121214; padding: 16px; margin: 0; }
+.pz-root.pz-root .pz-content p { display: block; margin: 0 0 0.8em; padding: 0; font: inherit; color: inherit; text-transform: none; letter-spacing: normal; position: static; }
+.pz-root.pz-root .pz-content strong { font-weight: 700; }
+.pz-root.pz-root .pz-content a { color: #1a5fb4; text-decoration: underline; border: 0; }
+.pz-root.pz-root .pz-content code { font-family: ui-monospace, monospace; font-size: 0.9em; }
+.pz-root.pz-root .pz-richtext { outline-offset: 2px; }

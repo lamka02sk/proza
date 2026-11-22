@@ -1,0 +1,326 @@
+{
+  "source": "word-desktop",
+  "blocks": [
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Quarterly report",
+          "formats": []
+        },
+        "level": 1,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "This paragraph has bold, italic and underlined words, a link, text in red and blue, and a figure￼ with a note.",
+          "formats": [
+            {
+              "type": "bold",
+              "start": 19,
+              "end": 23
+            },
+            {
+              "type": "italic",
+              "start": 25,
+              "end": 31
+            },
+            {
+              "type": "underline",
+              "start": 36,
+              "end": 46
+            },
+            {
+              "type": "link",
+              "start": 56,
+              "end": 60,
+              "attrs": {
+                "href": "https://example.com/report"
+              }
+            },
+            {
+              "type": "footnote",
+              "start": 96,
+              "end": 97,
+              "attrs": {
+                "note": "Figures from the audited accounts."
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Highlights",
+          "formats": []
+        },
+        "level": 2,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "bullet",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Sales grew in every region",
+              "formats": [
+                {
+                  "type": "bold",
+                  "start": 14,
+                  "end": 19
+                }
+              ]
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": [
+            {
+              "type": "core/list",
+              "attrs": {
+                "style": "bullet",
+                "numbering": "1",
+                "start": 1,
+                "reversed": false,
+                "anchor": "",
+                "lang": "",
+                "dir": "",
+                "size": "",
+                "color": ""
+              },
+              "children": [
+                {
+                  "type": "core/list-item",
+                  "attrs": {
+                    "content": {
+                      "text": "North: 12 %",
+                      "formats": []
+                    },
+                    "checked": false,
+                    "lang": "",
+                    "dir": ""
+                  },
+                  "children": []
+                },
+                {
+                  "type": "core/list-item",
+                  "attrs": {
+                    "content": {
+                      "text": "South: 9 %",
+                      "formats": []
+                    },
+                    "checked": false,
+                    "lang": "",
+                    "dir": ""
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Costs stayed flat",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Next steps, continuing the numbering:",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "number",
+        "numbering": "1",
+        "start": 3,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Hire two people",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Open the new office",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/quote",
+      "attrs": {
+        "citation": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/paragraph",
+          "attrs": {
+            "content": {
+              "text": "“Numbers tell the story.”",
+              "formats": []
+            },
+            "anchor": "",
+            "textAlign": "",
+            "lang": "",
+            "dir": "",
+            "size": "",
+            "color": ""
+          }
+        }
+      ]
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Prepared by the finance team.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "center",
+        "lang": "",
+        "dir": "",
+        "size": "s",
+        "color": ""
+      }
+    }
+  ],
+  "report": [
+    {
+      "code": "comment",
+      "severity": "lost",
+      "count": 1,
+      "samples": []
+    },
+    {
+      "code": "color",
+      "severity": "lost",
+      "count": 2,
+      "samples": [
+        "red",
+        "#4472C4"
+      ]
+    },
+    {
+      "code": "tracked",
+      "severity": "changed",
+      "count": 2,
+      "samples": []
+    },
+    {
+      "code": "font",
+      "severity": "changed",
+      "count": 1,
+      "samples": [
+        "Calibri"
+      ]
+    },
+    {
+      "code": "list",
+      "severity": "info",
+      "count": 2,
+      "samples": []
+    },
+    {
+      "code": "footnote",
+      "severity": "info",
+      "count": 1,
+      "samples": []
+    },
+    {
+      "code": "empty",
+      "severity": "info",
+      "count": 1,
+      "samples": []
+    }
+  ],
+  "pending": []
+}

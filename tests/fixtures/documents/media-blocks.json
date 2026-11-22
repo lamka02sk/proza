@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "blocks": [
+    { "id": "p1", "type": "core/paragraph", "attrs": { "content": { "text": "Large grey text.", "formats": [] }, "anchor": "", "textAlign": "", "lang": "", "dir": "", "size": "l", "color": "grey" } },
+    { "id": "im", "type": "core/image", "attrs": { "src": "/media/market.jpg", "alt": "Two market stalls with striped awnings", "decorative": false, "width": "m", "naturalWidth": 1600, "naturalHeight": 900, "srcset": "/media/market-800.jpg 800w, /media/market.jpg 1600w", "href": "", "caption": { "text": "The square on Saturday", "formats": [] }, "anchor": "market", "align": "center" } },
+    { "id": "ga", "type": "core/gallery", "attrs": { "columns": 2, "caption": { "text": "", "formats": [] }, "anchor": "" }, "children": [
+      { "id": "g1", "type": "core/image", "attrs": { "src": "/media/a.jpg", "alt": "", "decorative": true, "width": "l", "naturalWidth": 800, "naturalHeight": 600, "srcset": "", "href": "", "caption": { "text": "", "formats": [] }, "anchor": "", "align": "" } },
+      { "id": "g2", "type": "core/image", "attrs": { "src": "/media/b.jpg", "alt": "A dog asleep in the sun", "decorative": false, "width": "l", "naturalWidth": 800, "naturalHeight": 600, "srcset": "", "href": "", "caption": { "text": "", "formats": [] }, "anchor": "", "align": "" } }
+    ] },
+    { "id": "vi", "type": "core/video", "attrs": { "src": "/media/talk.mp4", "poster": "", "captions": "/media/talk.vtt", "captionsLang": "en", "naturalWidth": 1280, "naturalHeight": 720, "caption": { "text": "", "formats": [] }, "transcript": { "text": "Welcome to the talk.", "formats": [] }, "anchor": "" } },
+    { "id": "au", "type": "core/audio", "attrs": { "src": "/media/episode.mp3", "caption": { "text": "Episode 1", "formats": [] }, "transcript": { "text": "", "formats": [] }, "anchor": "" } },
+    { "id": "em", "type": "core/embed", "attrs": { "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "title": "A song", "ratio": "16-9", "facade": false, "caption": { "text": "", "formats": [] }, "anchor": "" } },
+    { "id": "fi", "type": "core/file", "attrs": { "href": "/media/prices.pdf", "name": "Prices 2026", "bytes": 48213, "anchor": "" } },
+    { "id": "cl", "type": "core/list", "attrs": { "style": "check", "numbering": "1", "start": 1, "reversed": false, "anchor": "", "lang": "", "dir": "", "size": "", "color": "" }, "children": [
+      { "id": "c1", "type": "core/list-item", "attrs": { "content": { "text": "Bread", "formats": [] }, "checked": true, "lang": "", "dir": "" } }
+    ] }
+  ]
+}

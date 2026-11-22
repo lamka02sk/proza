@@ -1,0 +1,143 @@
+/**
+ * Adding parts: the
+ * plus beside a part, the appender, `/` on an empty line, search, recently
+ * used and patterns.
+ */
+import { expect, test } from '@playwright/test'
+import { MOD, announcements, caret, expectCanonical, focusedBlock, open, outline, para, selection } from './editor-helpers'
+
+test('the plus beside a part opens the add menu; Enter adds the first tile below the part', async ({ page }) => {
+  await open(page, [para('one', 'a'), para('two', 'b')])
+  await caret(page, 'a', 1)
+  const plus = page.locator('.gut:not(.is-hover) .plus')
+  await expect(plus).toHaveAccessibleName('Add something below')
+  await plus.click()
+  const menu = page.getByRole('dialog', { name: 'Add to your text' })
+  await expect(menu).toBeVisible()
+  await expect(plus).toHaveAttribute('aria-expanded', 'true')
+  const search = menu.getByRole('combobox', { name: 'Search what to add' })
+  await expect(search).toBeFocused()
+  await expect(menu.getByText('Adds it below “Text: one”.')).toBeVisible()
+  await search.fill('head')
+  await expect(menu.getByRole('option')).toHaveText(['Heading', 'Contents'])
+  await page.keyboard.press('Enter')
+  await expect(menu).toBeHidden()
+  expect(await outline(page)).toEqual(['paragraph: one', 'heading2: ', 'paragraph: two'])
+  // The caret is in the new heading, and the change is announced with Undo beside it.
+  const s = await selection(page)
+  expect(s).toMatchObject({ kind: 'text', field: 'content', anchor: 0 })
+  expect(await page.evaluate(() => { const s = window.__editor!.editor.selection; return s.kind === 'text' ? window.__editor!.editor.tree.nodes.get(s.blockId)?.type : null })).toBe('core/heading')
+  expect((await announcements(page)).at(-1)).toBe('Heading added')
+  await expect(page.locator('.status .msg-on')).toContainText('Heading added')
+  await page.locator('.status .msg-on').getByRole('button', { name: 'Undo' }).click()
+  expect(await outline(page)).toEqual(['paragraph: one', 'paragraph: two'])
+  await expectCanonical(page)
+})
+
+test('arrows move the active tile and the combobox points at it; clicking a tile adds it; Escape returns focus', async ({ page }) => {
+  await open(page, [para('one', 'a'), para('two', 'b')])
+  await caret(page, 'a', 1)
+  await page.locator('.gut:not(.is-hover) .plus').click()
+  const search = page.getByRole('combobox', { name: 'Search what to add' })
+  const first = await search.getAttribute('aria-activedescendant')
+  await page.keyboard.press('ArrowDown')
+  const second = await search.getAttribute('aria-activedescendant')
+  expect(second).not.toBe(first)
+  await expect(page.locator(`[id="${second!}"]`)).toHaveAttribute('aria-selected', 'true')
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog', { name: 'Add to your text' })).toBeHidden()
+  await expect(page.locator('.gut:not(.is-hover) .plus')).toBeFocused()
+  await page.locator('.gut:not(.is-hover) .plus').click()
+  await page.getByRole('option', { name: 'Divider' }).click()
+  expect(await outline(page)).toEqual(['paragraph: one', 'separator', 'paragraph: two'])
+})
+
+test('search ignores diacritics and searches the technical name and keywords', async ({ page }) => {
+  await open(page, [para('one', 'a')], '?locale=sk')
+  await page.locator('.appender button').click()
+  const search = page.getByRole('combobox', { name: 'Hľadať, čo pridať' })
+  await search.fill('citat')
+  await expect(page.getByRole('option')).toHaveText(['Citát'])
+  await search.fill('blockquote')
+  await expect(page.getByRole('option')).toHaveText(['Citát'])
+  await search.fill('zzz')
+  await expect(page.getByText('Nič sa nenašlo. Skúste iné slovo.')).toBeVisible()
+  await expect.poll(async () => (await announcements(page)).at(-1)).toBe('Nič sa nenašlo. Skúste iné slovo.')
+})
+
+test('the appender adds at the end, using an empty last line', async ({ page }) => {
+  await open(page, [para('one', 'a'), para('', 'b')])
+  await page.locator('.appender button').click()
+  await expect(page.getByRole('dialog', { name: 'Add to the end of your text' })).toBeVisible()
+  await page.getByRole('option', { name: 'Quote' }).click()
+  expect(await outline(page)).toEqual(['paragraph: one', 'quote', '  paragraph: '])
+  expect(await focusedBlock(page)).not.toBeNull()
+})
+
+test('used items come back first under Used recently; patterns insert their blocks', async ({ page }) => {
+  await open(page, [para('one', 'a')])
+  await page.locator('.appender button').click()
+  await page.getByRole('option', { name: 'Code' }).click()
+  await page.locator('.appender button').click()
+  const recent = page.getByRole('group', { name: 'Used recently' })
+  await expect(recent.getByRole('option')).toHaveText(['Code'])
+  await page.getByRole('group', { name: 'Ready-made layouts' }).getByRole('option', { name: 'Question and answer' }).click({ timeout: 5000 })
+  expect(await outline(page)).toEqual(['paragraph: one', 'code: ', 'heading3: Question?', 'paragraph: Answer.'])
+})
+
+test('/ on an empty line opens the menu at the line; typing filters; Enter replaces the line', async ({ page }) => {
+  await open(page, [para('one', 'a'), para('', 'b')])
+  await caret(page, 'b', 0)
+  await page.keyboard.type('/')
+  const menu = page.getByRole('dialog', { name: 'Add to your text' })
+  await expect(menu).toBeVisible()
+  const field = page.locator('[data-block="b"] [data-field]')
+  // The text keeps the focus and names the list and the active tile.
+  await expect(field).toBeFocused()
+  await expect(field).toHaveAttribute('aria-autocomplete', 'list')
+  const list = await field.getAttribute('aria-controls')
+  await expect(page.locator(`[id="${list!}"]`)).toHaveAttribute('role', 'listbox')
+  await page.keyboard.type('num')
+  await expect(menu.getByRole('option')).toHaveText(['Numbered list'])
+  await expect(page.locator(`[id="${(await field.getAttribute('aria-activedescendant'))!}"]`)).toHaveText('Numbered list')
+  await page.keyboard.press('Enter')
+  await expect(menu).toBeHidden()
+  expect(await outline(page)).toEqual(['paragraph: one', 'list', '  list-item'])
+  await page.keyboard.type('first')
+  expect(await outline(page)).toEqual(['paragraph: one', 'list', '  list-item: first'])
+  await expectCanonical(page)
+})
+
+test('/ then Escape leaves the typed text; a space after no match closes the menu', async ({ page }) => {
+  await open(page, [para('', 'a')])
+  await caret(page, 'a', 0)
+  await page.keyboard.type('/he')
+  await expect(page.getByRole('option')).toHaveText(['Heading', 'Contents'])
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog', { name: 'Add to your text' })).toBeHidden()
+  expect(await outline(page)).toEqual(['paragraph: /he'])
+  expect(await selection(page)).toMatchObject({ kind: 'text', blockId: 'a' })
+  await page.keyboard.press(`${MOD}+a`)
+  await page.keyboard.press('Backspace')
+  await page.keyboard.type('/xyz ')
+  await expect(page.getByRole('dialog', { name: 'Add to your text' })).toBeHidden()
+  await page.keyboard.press('Enter')
+  expect(await outline(page)).toEqual(['paragraph: /xyz ', 'paragraph: '])
+})
+
+test('/ in the middle of text does nothing', async ({ page }) => {
+  await open(page, [para('a and b', 'a')])
+  await caret(page, 'a', 1)
+  await page.keyboard.type(' /')
+  await expect(page.getByRole('dialog', { name: 'Add to your text' })).toBeHidden()
+})
+
+test('an empty editor shows the placeholder and starters; a starter adds its part', async ({ page }) => {
+  await open(page, undefined, '?empty')
+  const field = page.locator('.pz-canvas [data-field]')
+  await expect(field).toHaveAttribute('aria-placeholder', 'Write here, or type / to add a picture, list or heading')
+  await expect(page.getByText('Or start with')).toBeVisible()
+  await page.getByRole('button', { name: 'A list' }).click()
+  expect(await outline(page)).toEqual(['list', '  list-item'])
+  await expect(page.getByText('Or start with')).toBeHidden()
+})

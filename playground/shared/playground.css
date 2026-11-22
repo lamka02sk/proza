@@ -1,0 +1,54 @@
+/* Playground chrome only. Not shipped. Colours from brand/README.txt. */
+:root {
+  color-scheme: light dark;
+  --accent: #ff6a2b;
+  --ink: #121214;
+  --paper: #f4f2ee;
+  --bg: #ffffff;
+  --fg: #121214;
+  --muted: #5b5b63;
+  --line: #d9d6cf;
+  --panel: #f4f2ee;
+  --pz-focus: #1a5fb4;
+  font: 16px/1.5 system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #121214; --fg: #f4f2ee; --muted: #a9a8a3; --line: #34343a; --panel: #1c1c20; --pz-focus: #7ab0ff; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); }
+header.pg { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-block-end: 1px solid var(--line); }
+header.pg img { block-size: 28px; }
+header.pg h1 { font-size: 1.1rem; margin: 0; }
+header.pg a { color: inherit; }
+main.pg { padding: 16px; max-inline-size: 1200px; margin-inline: auto; }
+.grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; }
+@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+.toolbar { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); position: sticky; top: 0; z-index: 1; }
+.toolbar button, .btn { min-inline-size: 36px; min-block-size: 36px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); font: inherit; cursor: pointer; padding: 0 8px; }
+.toolbar button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.toolbar .sep { inline-size: 1px; background: var(--line); margin: 4px 2px; }
+.canvas { border: 1px solid var(--line); border-radius: 6px; padding: 16px 24px; margin-block-start: 8px; min-block-size: 240px; font: 18px/1.6 Georgia, serif; }
+.canvas p { margin: 0 0 0.8em; }
+.canvas a { color: var(--pz-focus); }
+.canvas code { font: 0.9em ui-monospace, monospace; background: var(--panel); padding: 0 2px; }
+pre.out { font: 12px/1.4 ui-monospace, monospace; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px; overflow: auto; max-block-size: 360px; white-space: pre-wrap; margin: 0; }
+section h2 { font-size: 0.95rem; margin: 16px 0 6px; }
+.muted { color: var(--muted); font-size: 0.9rem; }
+ul.links li { margin-block: 6px; }
+.canvas kbd { font: 0.85em ui-monospace, monospace; border: 1px solid var(--line); border-block-end-width: 2px; border-radius: 3px; padding: 0 3px; }
+.canvas abbr[title] { text-decoration: underline dotted; }
+.canvas .pz-color-accent { color: #b93e0c; }
+.canvas .pz-fn { color: var(--pz-focus); font-size: 0.75em; }
+.canvas img { block-size: 1.2em; inline-size: auto; }
+/* Block input rules in the spike only relabel a paragraph; the real block types live in src/blocks. */
+.canvas [data-type^="heading"] { font-weight: 700; font-size: 1.3em; }
+.canvas [data-type^="list"]::before { content: "• "; color: var(--muted); }
+.canvas [data-type="quote"] { font-style: italic; padding-inline-start: 12px; border-inline-start: 1px solid var(--fg); }
+.canvas [data-type="code"] { font-family: ui-monospace, monospace; }
+.canvas [data-type="separator"] { border-block-end: 1px solid var(--line); }
+@media (prefers-color-scheme: dark) { .canvas .pz-color-accent { color: #ff8e5c; } }
+.field-label { display: block; font-weight: 600; margin-block: 8px 6px; }
+dialog { max-inline-size: 640px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--fg); }
+dialog dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
+dialog dd { margin: 0; }

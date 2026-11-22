@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "lib": ["ES2023"], "types": [] },
+  "include": ["src/model", "src/a11y-check"],
+  "exclude": ["src/model/**/*.test.ts", "src/a11y-check/**/*.test.ts"]
+}

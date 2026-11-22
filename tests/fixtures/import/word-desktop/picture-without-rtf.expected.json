@@ -1,0 +1,65 @@
+{
+  "source": "word-desktop",
+  "blocks": [
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "",
+        "alt": "Stĺpcový graf predaja podľa štvrťrokov",
+        "decorative": false,
+        "width": "s",
+        "naturalWidth": 240,
+        "naturalHeight": 160,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "Obrázok 1: Predaj podľa štvrťrokov",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "",
+        "bleed": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Text po obrázku s English words v slovenskej vete.",
+          "formats": [
+            {
+              "type": "lang",
+              "start": 18,
+              "end": 31,
+              "attrs": {
+                "lang": "EN-GB"
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    }
+  ],
+  "report": [
+    {
+      "code": "image-missing",
+      "severity": "lost",
+      "count": 1,
+      "samples": [
+        "clip_image002.png"
+      ]
+    }
+  ],
+  "pending": [
+    {
+      "name": "clip_image002.png",
+      "file": null
+    }
+  ]
+}

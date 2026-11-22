@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forms · Proza</title>
+  <link rel="icon" href="/favicon.svg">
+</head>
+<body>
+  <header class="pg"><a href="../"><img src="/svg/proza-znacka-oranzova.svg" alt="Playground"></a><h1>Forms</h1></header>
+  <main class="pg">
+    <p class="muted">The editor in a host's form: an enhanced textarea, the <code>&lt;proza-editor&gt;</code> element and the Vue component, side by side. Submitting shows what the server would receive. Parameters: <code>?draft</code> keeps drafts, <code>?readonly</code>, <code>?height=240px</code>.</p>
+    <form id="form" method="post" action="#">
+      <p><label for="body">Article (textarea)</label></p>
+      <textarea id="body" name="body" required>&lt;p&gt;Text that was written in the &lt;strong&gt;old&lt;/strong&gt; editor.&lt;/p&gt;</textarea>
+      <p><label for="summary">Summary (custom element)</label></p>
+      <proza-editor id="summary" name="summary" preset="basic" required>
+        <script type="application/json">{"version":1,"blocks":[{"id":"s1","type":"core/paragraph","attrs":{"content":{"text":"A short summary.","formats":[]}}}]}</script>
+      </proza-editor>
+      <p class="field-label" id="vue-label">Notes (Vue component)</p>
+      <div id="vue"></div>
+      <p><button type="submit" id="submit">Send</button> <button type="reset" id="reset">Reset</button></p>
+    </form>
+    <section>
+      <h2>Submitted</h2>
+      <pre id="sent" class="out" aria-label="Submitted form data" tabindex="0"></pre>
+      <h2>Events</h2>
+      <pre id="events" class="out" aria-label="Events" tabindex="0"></pre>
+    </section>
+  </main>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

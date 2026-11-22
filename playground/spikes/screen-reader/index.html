@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Screen reader structures · Proza</title>
+  <link rel="icon" href="/favicon.svg">
+</head>
+<body>
+  <header class="pg"><a href="../../"><img src="/svg/proza-znacka-oranzova.svg" alt="Playground"></a><h1>Screen reader structures</h1></header>
+  <main class="pg">
+    <nav aria-label="Variants"><ul class="links" id="variants"></ul></nav>
+    <p class="muted" id="about"></p>
+    <p><a href="#after" id="before">Link before the editor</a></p>
+    <div id="toolbar" class="toolbar" role="toolbar" aria-label="Formatting"></div>
+    <div id="canvas" class="canvas"></div>
+    <p><a href="#before" id="after">Link after the editor</a></p>
+    <div id="announcer" class="visually-hidden" aria-live="polite"></div>
+  </main>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+# Changelog
+
+Proza follows [semantic versioning](https://semver.org). The public API is what [`docs/api/report.md`](docs/api/report.md) lists. Stored documents carry their own version and always load in later releases.
+
+## 0.1.0 (2026-11-22)
+
+First public release.
+
+### The package
+
+- `@lamka02sk/proza`: `createEditor()`, the `Editor`, and what you need to write block types (`defineBlock`, `defineSchema`, `RichTextView`, `BlockList`, `useEditor`, `newBlock`, `h`).
+- `@lamka02sk/proza/element`: the `<proza-editor>` form field.
+- `@lamka02sk/proza/vue`: the `ProzaEditor` component with `v-model`.
+- `@lamka02sk/proza/render`: rendering, validation and the sanitiser policy. Runs in Node without a DOM.
+- `@lamka02sk/proza/content.css` for the published page and `@lamka02sk/proza/sanitizer-policy.json` for sanitisers in other languages.
+- A host bundle with `createEditor`, Vue and Reka UI included, loads about 209 kB of gzipped JavaScript up front. Code highlighting, the character table and the Word importer load when first used.
+
+### Editing
+
+- Text, media, layout, table and utility blocks, with a `/` menu, an inserter, block options, an outline and a status line.
+- Selection across blocks, with copy, cut, paste and formatting over the whole range.
+- Import from Word, Google Docs, LibreOffice, Excel, TinyMCE and `.docx` files.
+- Find and replace, special characters and emoji, word count, a preview of the published page, read-only mode, draft recovery, block locking, style variants and block transforms.
+- An accessibility checker with repairs that undo in one step, and an optional rule that blocks saving while errors remain.
+
+### Integration
+
+- Enhance a `<textarea>`, use the custom element or the Vue component; all three submit with the form and respect `required` and `readonly`.
+- Hooks for block changes, upload progress and the host's own media library.
+- A plugin API for blocks, formats, commands, toolbar buttons, block options, import rules, checker rules, locales and embed providers.
+- English and Slovak interface; the published page's labels follow the content's language.
+
+### Security
+
+- Pasted HTML, imported files and stored JSON are validated, and the work they cost grows with their size, never with numbers inside them.
+- Output goes through one tag and attribute allow-list, which `sanitizeElement()` and `sanitizer-policy.json` export for your server.
+- Raw HTML is off by default. When on, the editor previews it in a sandboxed frame.
+- Runs under a strict Content Security Policy: no `unsafe-inline`, no `unsafe-eval`.

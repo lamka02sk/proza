@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Editor · Proza</title>
+  <link rel="icon" href="/favicon.svg">
+</head>
+<body>
+  <header class="pg"><a href="../"><img src="/svg/proza-znacka-oranzova.svg" alt="Playground"></a><h1>Editor</h1></header>
+  <main class="pg grid">
+    <div>
+      <p><a href="#" id="before">Link before the editor</a></p>
+      <p class="field-label" id="content-label">Content</p>
+      <div id="editor"></div>
+      <p><a href="#" id="after">Link after the editor</a></p>
+      <p class="muted">The editor as a form field: part tools beside the text (Alt+F10), the plus and <kbd>/</kbd> to add, the bubble over selected words, the status line with undo, outline, the accessibility check (Alt+Shift+A), phone view, source, expand and help (Alt+0 lists every shortcut). Parameters: <code>?locale=sk</code>, <code>?blocks=2000</code>, <code>?theme=dark</code>, <code>?dir=rtl</code>, <code>?toolbar=docked</code>, <code>?empty</code>, <code>?preset=basic</code>, <code>?upload=off|slow|fail</code>, <code>?rawhtml</code>, <code>?locking</code>, <code>?styles</code>, <code>?plugin</code>, <code>?justify</code>, <code>?onsave=block</code>.</p>
+    </div>
+    <div>
+      <section>
+        <h2>Announcements</h2>
+        <pre id="announce" class="out" aria-label="Announcement log" tabindex="0"></pre>
+      </section>
+      <section>
+        <h2>Document JSON</h2>
+        <pre id="json" class="out" aria-label="Document JSON" tabindex="0"></pre>
+      </section>
+      <section>
+        <h2>Rendered HTML</h2>
+        <pre id="html" class="out" aria-label="Rendered HTML" tabindex="0"></pre>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+blob-report/
+*.log
+.DS_Store
+.vite/
+proza-logo-b.zip
+
+# Internal planning and agent notes, kept locally, not published.
+PLAN.md
+CLAUDE.md
+docs/decisions/
+docs/design/
+docs/m[0-9]*/
+docs/picturium-integration-plan.md
+.claude/
+.impeccable/

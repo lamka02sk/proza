@@ -1,0 +1,3 @@
+# vue-demi (via Reka UI and @floating-ui/vue) ships Vue 3 files by default; its install script only switches them for Vue 2.
+allowBuilds:
+  vue-demi: false

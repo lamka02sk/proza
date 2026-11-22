@@ -1,0 +1,200 @@
+{
+  "source": "libreoffice-writer",
+  "blocks": [
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Pozvánka",
+          "formats": []
+        },
+        "level": 2,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Milí kolegovia,",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "pozývame vás na výročné stretnutie, ktoré sa uskutoční v piatok￼. Program nájdete na webe.",
+          "formats": [
+            {
+              "type": "bold",
+              "start": 16,
+              "end": 34
+            },
+            {
+              "type": "italic",
+              "start": 57,
+              "end": 63
+            },
+            {
+              "type": "footnote",
+              "start": 63,
+              "end": 64,
+              "attrs": {
+                "note": "Začiatok o 17:00."
+              }
+            },
+            {
+              "type": "link",
+              "start": 85,
+              "end": 89,
+              "attrs": {
+                "href": "https://example.org/program"
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "number",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Otvorenie",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Správa o činnosti",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": [
+            {
+              "type": "core/list",
+              "attrs": {
+                "style": "bullet",
+                "numbering": "1",
+                "start": 1,
+                "reversed": false,
+                "anchor": "",
+                "lang": "",
+                "dir": "",
+                "size": "",
+                "color": ""
+              },
+              "children": [
+                {
+                  "type": "core/list-item",
+                  "attrs": {
+                    "content": {
+                      "text": "rok 2026",
+                      "formats": [
+                        {
+                          "type": "code",
+                          "start": 0,
+                          "end": 8
+                        }
+                      ]
+                    },
+                    "checked": false,
+                    "lang": "",
+                    "dir": ""
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Diskusia",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Výbor spolku",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "end",
+        "lang": "",
+        "dir": "",
+        "size": "s",
+        "color": ""
+      }
+    }
+  ],
+  "report": [
+    {
+      "code": "font",
+      "severity": "changed",
+      "count": 1,
+      "samples": [
+        "Liberation Sans"
+      ]
+    },
+    {
+      "code": "footnote",
+      "severity": "info",
+      "count": 1,
+      "samples": []
+    }
+  ],
+  "pending": []
+}

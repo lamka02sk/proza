@@ -1,0 +1,470 @@
+{
+  "source": "html",
+  "blocks": [
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Home · Blog",
+          "formats": [
+            {
+              "type": "link",
+              "start": 0,
+              "end": 4,
+              "attrs": {
+                "href": "/"
+              }
+            },
+            {
+              "type": "link",
+              "start": 7,
+              "end": 11,
+              "attrs": {
+                "href": "/blog"
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Reading old maps",
+          "formats": []
+        },
+        "level": 1,
+        "anchor": "top",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "By A. Author",
+          "formats": [
+            {
+              "type": "link",
+              "start": 3,
+              "end": 12,
+              "attrs": {
+                "href": "/people/a"
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Old maps are beautiful and often wrong. Press Ctrl+F to search. The word Landkarte is German.",
+          "formats": [
+            {
+              "type": "highlight",
+              "start": 13,
+              "end": 22
+            },
+            {
+              "type": "abbr",
+              "start": 27,
+              "end": 32,
+              "attrs": {
+                "title": "frequently"
+              }
+            },
+            {
+              "type": "kbd",
+              "start": 46,
+              "end": 50
+            },
+            {
+              "type": "kbd",
+              "start": 51,
+              "end": 52
+            },
+            {
+              "type": "lang",
+              "start": 73,
+              "end": 82,
+              "attrs": {
+                "lang": "de"
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "https://images.example.org/map.jpg",
+        "alt": "A hand-drawn map of a coast",
+        "decorative": false,
+        "width": "l",
+        "naturalWidth": 1280,
+        "naturalHeight": 853,
+        "srcset": "https://images.example.org/map-640.jpg 640w, https://images.example.org/map.jpg 1280w",
+        "href": "",
+        "caption": {
+          "text": "The coast as drawn in 1750.",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "",
+        "bleed": ""
+      }
+    },
+    {
+      "type": "core/quote",
+      "attrs": {
+        "citation": {
+          "text": "Alfred Korzybski",
+          "formats": []
+        },
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/paragraph",
+          "attrs": {
+            "content": {
+              "text": "A map is not the territory.",
+              "formats": []
+            },
+            "anchor": "",
+            "textAlign": "",
+            "lang": "",
+            "dir": "",
+            "size": "",
+            "color": ""
+          }
+        }
+      ]
+    },
+    {
+      "type": "core/code",
+      "attrs": {
+        "content": {
+          "text": "def area(w, h):\n    return w * h",
+          "formats": []
+        },
+        "language": "python",
+        "anchor": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Scale",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "The ratio of distance on the map to distance on the ground.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/details",
+      "attrs": {
+        "summary": {
+          "text": "Sources",
+          "formats": []
+        },
+        "open": false,
+        "anchor": "",
+        "lang": "",
+        "dir": ""
+      },
+      "children": [
+        {
+          "type": "core/paragraph",
+          "attrs": {
+            "content": {
+              "text": "The national library.",
+              "formats": []
+            },
+            "anchor": "",
+            "textAlign": "",
+            "lang": "",
+            "dir": "",
+            "size": "",
+            "color": ""
+          }
+        }
+      ]
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "An icon and a form:",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Mail",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/video",
+      "attrs": {
+        "src": "/media/tour.mp4",
+        "poster": "/media/tour.jpg",
+        "captions": "/media/tour.vtt",
+        "captionsLang": "en",
+        "naturalWidth": 0,
+        "naturalHeight": 0,
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "transcript": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "שלום עולם",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "he",
+        "dir": "rtl",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Back to the top",
+          "formats": [
+            {
+              "type": "link",
+              "start": 0,
+              "end": 15,
+              "attrs": {
+                "href": "#top"
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/separator",
+      "attrs": {
+        "anchor": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "check",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Draft",
+              "formats": []
+            },
+            "checked": true,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Publish",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Related",
+          "formats": []
+        },
+        "level": 2,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "bullet",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Another post",
+              "formats": [
+                {
+                  "type": "link",
+                  "start": 0,
+                  "end": 12,
+                  "attrs": {
+                    "href": "/b"
+                  }
+                }
+              ]
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "© The site",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    }
+  ],
+  "report": [
+    {
+      "code": "element",
+      "severity": "lost",
+      "count": 2,
+      "samples": [
+        "svg",
+        "button"
+      ]
+    },
+    {
+      "code": "structure",
+      "severity": "changed",
+      "count": 1,
+      "samples": [
+        "form"
+      ]
+    }
+  ],
+  "pending": []
+}

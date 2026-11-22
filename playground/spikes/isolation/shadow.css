@@ -1,0 +1,2 @@
+/* Inside the shadow root. :host is reset so inherited host styles stop at the boundary. */
+:host { all: initial; display: block; }

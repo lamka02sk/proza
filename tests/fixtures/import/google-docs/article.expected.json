@@ -1,0 +1,408 @@
+{
+  "source": "google-docs",
+  "blocks": [
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Trip to the mountains",
+          "formats": []
+        },
+        "level": 1,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "We left at six and reached the Téryho chata by noon￼. H2O was scarce. Route on the map (bring a torch).",
+          "formats": [
+            {
+              "type": "bold",
+              "start": 11,
+              "end": 14
+            },
+            {
+              "type": "italic",
+              "start": 31,
+              "end": 43
+            },
+            {
+              "type": "footnote",
+              "start": 51,
+              "end": 52,
+              "attrs": {
+                "note": "About 1,000 m of climbing."
+              }
+            },
+            {
+              "type": "subscript",
+              "start": 55,
+              "end": 56
+            },
+            {
+              "type": "link",
+              "start": 79,
+              "end": 86,
+              "attrs": {
+                "href": "https://maps.example.com/route"
+              }
+            },
+            {
+              "type": "highlight",
+              "start": 86,
+              "end": 102
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Packing list",
+          "formats": []
+        },
+        "level": 2,
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "bullet",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Boots",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": [
+            {
+              "type": "core/list",
+              "attrs": {
+                "style": "bullet",
+                "numbering": "1",
+                "start": 1,
+                "reversed": false,
+                "anchor": "",
+                "lang": "",
+                "dir": "",
+                "size": "",
+                "color": ""
+              },
+              "children": [
+                {
+                  "type": "core/list-item",
+                  "attrs": {
+                    "content": {
+                      "text": "Spare laces",
+                      "formats": []
+                    },
+                    "checked": false,
+                    "lang": "",
+                    "dir": ""
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Water",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "check",
+        "numbering": "1",
+        "start": 1,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Book the hut",
+              "formats": [
+                {
+                  "type": "strikethrough",
+                  "start": 0,
+                  "end": 12
+                }
+              ]
+            },
+            "checked": true,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Check the weather",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "https://lh7-rt.googleusercontent.com/docsz/AD_4nXexample-photo-id?key=abc",
+        "alt": "The ridge at sunrise",
+        "decorative": false,
+        "width": "l",
+        "naturalWidth": 602,
+        "naturalHeight": 339,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "",
+        "bleed": ""
+      }
+    },
+    {
+      "type": "core/table",
+      "attrs": {
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "mode": "scroll",
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "bleed": ""
+      },
+      "children": [
+        {
+          "type": "core/table-row",
+          "attrs": {},
+          "children": [
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "Day",
+                      "formats": [
+                        {
+                          "type": "bold",
+                          "start": 0,
+                          "end": 3
+                        }
+                      ]
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            },
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "Distance",
+                      "formats": [
+                        {
+                          "type": "bold",
+                          "start": 0,
+                          "end": 8
+                        }
+                      ]
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "core/table-row",
+          "attrs": {},
+          "children": [
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "Saturday",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            },
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "14 km",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "report": [
+    {
+      "code": "font",
+      "severity": "changed",
+      "count": 1,
+      "samples": [
+        "Arial"
+      ]
+    },
+    {
+      "code": "image-remote",
+      "severity": "changed",
+      "count": 1,
+      "samples": [
+        "lh7-rt.googleusercontent.com"
+      ]
+    },
+    {
+      "code": "footnote",
+      "severity": "info",
+      "count": 1,
+      "samples": []
+    }
+  ],
+  "pending": []
+}

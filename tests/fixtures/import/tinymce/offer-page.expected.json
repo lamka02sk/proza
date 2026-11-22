@@ -1,0 +1,599 @@
+{
+  "source": "tinymce",
+  "blocks": [
+    {
+      "type": "core/heading",
+      "attrs": {
+        "content": {
+          "text": "Our summer offer",
+          "formats": [
+            {
+              "type": "color",
+              "start": 4,
+              "end": 10,
+              "attrs": {
+                "color": "orange"
+              }
+            }
+          ]
+        },
+        "level": 2,
+        "anchor": "",
+        "textAlign": "center",
+        "lang": "",
+        "dir": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "A large introduction, as editors set it with the size menu.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "l",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "An indented paragraph with bold, italic, underlined, struck, x2 and code.",
+          "formats": [
+            {
+              "type": "bold",
+              "start": 27,
+              "end": 31
+            },
+            {
+              "type": "italic",
+              "start": 33,
+              "end": 39
+            },
+            {
+              "type": "underline",
+              "start": 41,
+              "end": 51
+            },
+            {
+              "type": "strikethrough",
+              "start": 53,
+              "end": 59
+            },
+            {
+              "type": "superscript",
+              "start": 62,
+              "end": 63
+            },
+            {
+              "type": "code",
+              "start": 68,
+              "end": 72
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "/uploads/2019/pool.jpg",
+        "alt": "The pool at dusk",
+        "decorative": false,
+        "width": "s",
+        "naturalWidth": 300,
+        "naturalHeight": 200,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "start",
+        "bleed": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Text that flowed beside a floated picture.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "A justified paragraph.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/embed",
+      "attrs": {
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "title": "",
+        "ratio": "16-9",
+        "facade": false,
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": ""
+      }
+    },
+    {
+      "type": "core/embed",
+      "attrs": {
+        "url": "https://forms.example.com/embed/123",
+        "title": "Booking form",
+        "ratio": "16-9",
+        "facade": false,
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": ""
+      }
+    },
+    {
+      "type": "core/list",
+      "attrs": {
+        "style": "number",
+        "numbering": "a",
+        "start": 2,
+        "reversed": false,
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      },
+      "children": [
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Second",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": []
+        },
+        {
+          "type": "core/list-item",
+          "attrs": {
+            "content": {
+              "text": "Third",
+              "formats": []
+            },
+            "checked": false,
+            "lang": "",
+            "dir": ""
+          },
+          "children": [
+            {
+              "type": "core/list",
+              "attrs": {
+                "style": "bullet",
+                "numbering": "1",
+                "start": 1,
+                "reversed": false,
+                "anchor": "",
+                "lang": "",
+                "dir": "",
+                "size": "",
+                "color": ""
+              },
+              "children": [
+                {
+                  "type": "core/list-item",
+                  "attrs": {
+                    "content": {
+                      "text": "Nested",
+                      "formats": []
+                    },
+                    "checked": false,
+                    "lang": "",
+                    "dir": ""
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "core/table",
+      "attrs": {
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "mode": "scroll",
+        "anchor": "",
+        "lang": "",
+        "dir": "",
+        "bleed": ""
+      },
+      "children": [
+        {
+          "type": "core/table-row",
+          "attrs": {},
+          "children": [
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "Room",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            },
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "Price",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "core/table-row",
+          "attrs": {},
+          "children": [
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "Double",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            },
+            {
+              "type": "core/table-cell",
+              "attrs": {
+                "header": false,
+                "colspan": 1,
+                "rowspan": 1,
+                "scope": "",
+                "textAlign": "",
+                "lang": "",
+                "dir": ""
+              },
+              "children": [
+                {
+                  "type": "core/paragraph",
+                  "attrs": {
+                    "content": {
+                      "text": "90 €",
+                      "formats": []
+                    },
+                    "anchor": "",
+                    "textAlign": "",
+                    "lang": "",
+                    "dir": "",
+                    "size": "",
+                    "color": ""
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "core/code",
+      "attrs": {
+        "content": {
+          "text": "const nights = 3;\nconsole.log(nights * 90);",
+          "formats": []
+        },
+        "language": "javascript",
+        "anchor": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Write to us with the form or this link.",
+          "formats": [
+            {
+              "type": "link",
+              "start": 21,
+              "end": 25,
+              "attrs": {
+                "href": "#contact"
+              }
+            }
+          ]
+        },
+        "anchor": "contact",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "An old font tag in blue",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/page-break",
+      "attrs": {}
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Highlighted and an external link.",
+          "formats": [
+            {
+              "type": "highlight",
+              "start": 0,
+              "end": 11
+            },
+            {
+              "type": "link",
+              "start": 19,
+              "end": 32,
+              "attrs": {
+                "href": "https://example.com/terms",
+                "target": "_blank"
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "Inside a callout box.",
+          "formats": []
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "",
+        "alt": "A pasted screenshot",
+        "decorative": false,
+        "width": "l",
+        "naturalWidth": 0,
+        "naturalHeight": 0,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "",
+        "bleed": ""
+      }
+    },
+    {
+      "type": "core/image",
+      "attrs": {
+        "src": "/uploads/2019/logo.png",
+        "alt": "",
+        "decorative": false,
+        "width": "s",
+        "naturalWidth": 120,
+        "naturalHeight": 40,
+        "srcset": "",
+        "href": "",
+        "caption": {
+          "text": "",
+          "formats": []
+        },
+        "anchor": "",
+        "align": "center",
+        "bleed": ""
+      }
+    }
+  ],
+  "report": [
+    {
+      "code": "link",
+      "severity": "lost",
+      "count": 1,
+      "samples": [
+        "javascript:alert(1)"
+      ]
+    },
+    {
+      "code": "color",
+      "severity": "lost",
+      "count": 1,
+      "samples": [
+        "#0000ff"
+      ]
+    },
+    {
+      "code": "color-matched",
+      "severity": "changed",
+      "count": 1,
+      "samples": [
+        "#e03e2d → orange"
+      ]
+    },
+    {
+      "code": "indent",
+      "severity": "changed",
+      "count": 1,
+      "samples": []
+    },
+    {
+      "code": "justify",
+      "severity": "changed",
+      "count": 1,
+      "samples": []
+    },
+    {
+      "code": "embed",
+      "severity": "changed",
+      "count": 1,
+      "samples": [
+        "forms.example.com"
+      ]
+    },
+    {
+      "code": "font",
+      "severity": "changed",
+      "count": 1,
+      "samples": [
+        "Verdana"
+      ]
+    },
+    {
+      "code": "empty",
+      "severity": "info",
+      "count": 1,
+      "samples": []
+    },
+    {
+      "code": "image-upload",
+      "severity": "info",
+      "count": 1,
+      "samples": []
+    }
+  ],
+  "pending": [
+    {
+      "name": "picture-1.png",
+      "file": {
+        "name": "picture-1.png",
+        "type": "image/png",
+        "size": 70
+      }
+    }
+  ]
+}

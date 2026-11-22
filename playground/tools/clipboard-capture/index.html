@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clipboard capture · Proza</title>
+  <link rel="icon" href="/favicon.svg">
+</head>
+<body>
+  <header class="pg"><a href="../../"><img src="/svg/proza-znacka-oranzova.svg" alt="Playground"></a><h1>Clipboard capture</h1></header>
+  <main class="pg">
+    <p><strong>Copy only test documents.</strong> Captures are committed to the repository as fixtures (<code>tests/fixtures/clipboard/</code>). Remove names, addresses and anything private before you copy.</p>
+    <form id="meta" class="grid" onsubmit="return false">
+      <div>
+        <p><label>Source application<br>
+          <select id="source" required>
+            <option value="word-desktop">Word desktop</option>
+            <option value="word-web">Word for the web</option>
+            <option value="google-docs">Google Docs</option>
+            <option value="libreoffice-writer">LibreOffice Writer</option>
+            <option value="apple-pages">Apple Pages</option>
+            <option value="outlook">Outlook</option>
+            <option value="excel">Excel</option>
+            <option value="google-sheets">Google Sheets</option>
+            <option value="libreoffice-calc">LibreOffice Calc</option>
+            <option value="tinymce">TinyMCE</option>
+            <option value="web-page">A web page</option>
+            <option value="other">Other</option>
+          </select></label></p>
+        <p><label>Application version<br><input id="version" size="30" placeholder="e.g. Microsoft 365 2410"></label></p>
+        <p><label>Operating system<br><input id="os" size="30"></label></p>
+      </div>
+      <div>
+        <p><label>What you copied<br><input id="description" size="40" required placeholder="e.g. two-level bulleted list with a bold word"></label></p>
+        <p><label>Notes<br><textarea id="notes" rows="3" cols="40"></textarea></label></p>
+      </div>
+    </form>
+    <div id="zone" class="canvas" tabindex="0" role="textbox" aria-label="Paste target: click here and paste" contenteditable="true">Click here and paste (Ctrl+V or Cmd+V).</div>
+    <p><button class="btn" type="button" id="read">Read clipboard instead (asks permission)</button>
+       <button class="btn" type="button" id="download" disabled>Download fixture</button></p>
+    <p id="status" role="status" class="muted"></p>
+    <section><h2>Formats</h2><pre id="types" class="out" tabindex="0" aria-label="Captured formats"></pre></section>
+    <section><h2>HTML preview (sandboxed, scripts off)</h2><iframe id="preview" sandbox="" title="Pasted HTML preview" style="inline-size:100%;block-size:320px;border:1px solid var(--line);background:#fff"></iframe></section>
+  </main>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

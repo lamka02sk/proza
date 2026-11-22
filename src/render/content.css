@@ -1,0 +1,212 @@
+/*
+ * content.css: published content, and the canvas, which
+ * loads the same rules so editing matches the result.
+ *
+ * - `.pz-content` is a size container: content responds to its column, not the window.
+ * - Logical properties only, so right-to-left content needs nothing else.
+ * - Tokens are custom properties. Inside the editor they follow its theme
+ *   (light, dark); on a page the host sets --pz-* or keeps the defaults.
+ * - Classes only (`pz-*`), no inline styles: works under a strict CSP.
+ */
+.pz-content {
+  --c-ink: var(--ink, var(--pz-ink, #121214));
+  --c-page: var(--page, var(--pz-page, #FFFFFF));
+  --c-ink-2: var(--ink-2, var(--pz-ink-2, #4B4C56));
+  --c-line: var(--line, var(--pz-line, #D2D3DB));
+  --c-panel: var(--panel, var(--pz-panel, #F7F7F9));
+  --c-hover: var(--hover, var(--pz-hover, rgba(18, 18, 20, .07)));
+  --c-wash: var(--wash, var(--pz-wash, #FFF0E8));
+  --c-link: var(--accent-text, var(--pz-accent-text, #B93E0C));
+  --c-blue: var(--blue, var(--pz-blue, #1D4ED8));
+  --c-heading: var(--pz-heading-font, "Gloock", Georgia, serif);
+  --c-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Code tokens (highlighted code blocks): readable on the code panel; hosts set --pz-tok-*. */
+  --c-tok-comment: var(--tok-comment, var(--pz-tok-comment, #5D5E68));
+  --c-tok-string: var(--tok-string, var(--pz-tok-string, #1C6B34));
+  --c-tok-number: var(--tok-number, var(--pz-tok-number, #A33A0B));
+  --c-tok-keyword: var(--tok-keyword, var(--pz-tok-keyword, #7A2BA8));
+  --c-tok-literal: var(--tok-literal, var(--pz-tok-literal, #A33A0B));
+  --c-tok-tag: var(--tok-tag, var(--pz-tok-tag, #1D4ED8));
+  --c-tok-attr: var(--tok-attr, var(--pz-tok-attr, #0B6467));
+  --c-tok-property: var(--tok-property, var(--pz-tok-property, #0B6467));
+  --c-tok-variable: var(--tok-variable, var(--pz-tok-variable, #8A3A00));
+  --c-tok-function: var(--tok-function, var(--pz-tok-function, #2747B0));
+  --c-tok-meta: var(--tok-meta, var(--pz-tok-meta, #5D5E68));
+  --c-radius: 5px;
+  /* The text column and wide parts. Hosts set --pz-measure and --pz-wide; by default
+     the column is the whole container, so wide and full parts look like the others. */
+  --c-measure: var(--pz-measure, 100%);
+  --c-wide: var(--pz-wide, var(--c-measure));
+  --c-gutter: max(0px, calc((var(--c-wide) - var(--c-measure)) / 2));
+  container: pz-content / inline-size;
+  display: grid;
+  grid-template-columns:
+    [full-start] minmax(0, 1fr) [wide-start] minmax(0, var(--c-gutter))
+    [content-start] min(100%, var(--c-measure))
+    [content-end] minmax(0, var(--c-gutter)) [wide-end] minmax(0, 1fr) [full-end];
+  overflow-wrap: break-word;
+}
+.pz-content > * { grid-column: content; }
+.pz-content > .pz-bleed-wide { grid-column: wide; }
+.pz-content > .pz-bleed-full { grid-column: full; }
+
+.pz-content :where(p, h1, h2, h3, h4, h5, h6, figure, blockquote, pre, ul, ol) { margin: 0; }
+/* Headings in the canvas are fields (.pz-h), in the output h1 to h6: one rule for both. Fluid with the column. */
+.pz-content :where(h1, h2, h3, h4, .pz-h1, .pz-h2, .pz-h3, .pz-h4) { font-family: var(--c-heading); font-weight: 400; line-height: 1.2; text-wrap: balance; }
+.pz-content :where(h1, .pz-h1) { font-size: clamp(1.625rem, 1.2rem + 2.4cqi, 2rem); }
+.pz-content :where(h2, .pz-h2) { font-size: clamp(1.375rem, 1.1rem + 1.6cqi, 1.5625rem); }
+.pz-content :where(h3, .pz-h3) { font-size: clamp(1.1875rem, 1.05rem + 1cqi, 1.3125rem); }
+.pz-content :where(h4, .pz-h4) { font-size: 1.1875rem; }
+.pz-content :where(h5, h6, .pz-h5, .pz-h6) { font-size: 1.0625rem; font-weight: 700; line-height: 1.3; }
+.pz-content :where(h6, .pz-h6) { color: var(--c-ink-2); }
+.pz-content :where(ul, ol) { padding-inline-start: 1.2em; }
+.pz-content li { padding-inline-start: .2em; }
+.pz-content li::marker { color: var(--c-link); }
+.pz-content a { color: var(--c-link); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.pz-content blockquote { padding-inline-start: 16px; border-inline-start: 1px solid var(--c-ink); font-size: 1.118em; font-style: italic; line-height: 1.45; }
+.pz-content :where(.pz-quote > figcaption, .pz-cite) { padding-inline-start: 17px; margin-block-start: 6px; color: var(--c-ink-2); font-size: .882em; }
+.pz-content hr { block-size: 2px; margin: 10px 0; border: 0; background: var(--c-line); }
+.pz-content :where(code, kbd, pre) { font-family: var(--c-mono); font-size: .88em; }
+.pz-content :not(pre) > code { padding: .05em .3em; border-radius: 4px; background: var(--c-hover); }
+.pz-content pre { padding: 10px 12px; border-radius: 6px; background: var(--c-panel); line-height: 1.5; }
+.pz-content pre > code { display: block; font-size: 1em; }
+.pz-content kbd { padding: 0 .3em; border: 1px solid var(--c-line); border-block-end-width: 2px; border-radius: 4px; }
+.pz-content abbr[title] { text-decoration: underline dotted; text-underline-offset: 3px; }
+.pz-content mark { background: var(--c-wash); color: inherit; }
+.pz-content .pz-fn { color: var(--c-link); font-size: .75em; }
+.pz-content .pz-text-center { text-align: center; }
+.pz-content .pz-text-end { text-align: end; }
+.pz-content .pz-text-justify { text-align: justify; hyphens: auto; }
+
+/* Size and colour presets: named steps, never free values. */
+.pz-content .pz-size-s { font-size: .882em; }
+.pz-content .pz-size-l { font-size: 1.176em; line-height: 1.45; }
+/* Not scoped to .pz-content: the editor's swatches show the same classes. */
+.pz-color-grey { color: var(--pz-color-grey, var(--ink-2, #4B4C56)); }
+.pz-color-orange { color: var(--pz-color-orange, var(--accent-text, #B93E0C)); }
+.pz-color-blue { color: var(--pz-color-blue, var(--blue, #1D4ED8)); }
+
+/* Checklists: the box is the list marker. */
+.pz-content .pz-checklist { list-style: none; padding-inline-start: 0; }
+.pz-content .pz-checklist > li { padding-inline-start: 0; }
+.pz-content .pz-checklist label { display: flex; align-items: baseline; gap: .5em; }
+.pz-content .pz-checklist input { flex: none; inline-size: 1em; block-size: 1em; margin: 0; translate: 0 .15em; accent-color: var(--c-link); }
+
+.pz-content .pz-table { overflow-x: auto; }
+.pz-content .pz-table table { border-collapse: collapse; inline-size: 100%; }
+.pz-content .pz-table caption { margin-block-end: 6px; text-align: start; }
+.pz-content .pz-table :is(th, td) { border: 1px solid var(--c-line); padding: 4px 8px; min-inline-size: 3em; vertical-align: top; text-align: start; }
+.pz-content .pz-table th { background: var(--c-panel); font-weight: 700; }
+.pz-content .pz-table :is(th, td).pz-text-center { text-align: center; }
+.pz-content .pz-table :is(th, td).pz-text-end { text-align: end; }
+.pz-content .pz-table:focus-visible { outline: 2px solid var(--c-ink); outline-offset: 2px; }
+/* Stacked (opt-in): on a narrow column each row is a card, each cell a label and its value. The roles in
+   the markup keep the table's semantics; the header row stays for assistive technology, out of sight. */
+@container pz-content (max-width: 600px) {
+  .pz-content .pz-table-stack :is(table, tbody, tr, th, td) { display: block; }
+  .pz-content .pz-table-stack tr:not(:has(> td)) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .pz-content .pz-table-stack tr { padding-block: 4px; border: 1px solid var(--c-line); border-radius: 6px; }
+  .pz-content .pz-table-stack tr + tr { margin-block-start: 8px; }
+  .pz-content .pz-table-stack :is(th, td) { display: grid; grid-template-columns: minmax(5em, 38%) minmax(0, 1fr); gap: 4px 12px; border: 0; }
+  .pz-content .pz-table-stack :is(th, td):not([data-pz-label]) { grid-template-columns: minmax(0, 1fr); }
+  .pz-content .pz-table-stack td[data-pz-label]::before { content: attr(data-pz-label); content: attr(data-pz-label) / ""; color: var(--c-ink-2); font-weight: 600; }
+  .pz-content .pz-table-stack td[data-pz-label] > * { grid-column: 2; }
+}
+
+/* Layout: ratio presets, stacking below a width in reading order. */
+.pz-content .pz-columns { display: grid; grid-template-columns: var(--c-ratio, minmax(0, 1fr) minmax(0, 1fr)); gap: var(--pz-column-gap, 1.5rem); }
+.pz-content .pz-layout-1-1-1 { --c-ratio: repeat(3, minmax(0, 1fr)); }
+.pz-content .pz-layout-2-1 { --c-ratio: minmax(0, 2fr) minmax(0, 1fr); }
+.pz-content .pz-layout-1-2 { --c-ratio: minmax(0, 1fr) minmax(0, 2fr); }
+.pz-content .pz-layout-1-1-1-1 { --c-ratio: repeat(4, minmax(0, 1fr)); }
+/* Each column is a column of its own: what is inside responds to its width. */
+.pz-content .pz-column { container: pz-content / inline-size; min-inline-size: 0; }
+@container pz-content (max-width: 800px) {
+  .pz-content .pz-layout-1-1-1-1 { --c-ratio: repeat(2, minmax(0, 1fr)); }
+}
+@container pz-content (max-width: 600px) {
+  .pz-content .pz-columns { --c-ratio: minmax(0, 1fr); }
+}
+.pz-content .pz-look-panel { padding: clamp(12px, 3cqi, 20px); border-radius: 8px; background: var(--c-panel); }
+.pz-content .pz-look-line { padding: clamp(12px, 3cqi, 20px); border: 1px solid var(--c-line); border-radius: 8px; }
+.pz-content .pz-details { padding-block: 8px; border-block: 1px solid var(--c-line); }
+.pz-content .pz-details > summary { font-weight: 600; cursor: pointer; }
+.pz-content .pz-details-body { padding-block-start: 6px; }
+.pz-content .pz-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.pz-content .pz-buttons.pz-text-center { justify-content: center; }
+.pz-content .pz-buttons.pz-text-end { justify-content: flex-end; }
+.pz-content .pz-button { display: inline-flex; align-items: center; min-block-size: 2.75em; padding: .45em 1.15em; border-radius: 8px; font-weight: 600; line-height: 1.3; text-decoration: none; }
+.pz-content .pz-button-fill { background: var(--c-link); color: var(--c-page); }
+.pz-content .pz-button-line { box-shadow: inset 0 0 0 1.5px currentColor; color: var(--c-link); }
+.pz-content .pz-button:focus-visible { outline: 2px solid var(--c-ink); outline-offset: 2px; }
+.pz-content .pz-spacer { block-size: var(--c-space, var(--pz-space-m, clamp(20px, 4cqi, 32px))); }
+.pz-content .pz-space-s { --c-space: var(--pz-space-s, clamp(10px, 2cqi, 16px)); }
+.pz-content .pz-space-l { --c-space: var(--pz-space-l, clamp(32px, 7cqi, 64px)); }
+.pz-content .pz-space-xl { --c-space: var(--pz-space-xl, clamp(48px, 10cqi, 96px)); }
+@media (forced-colors: active) {
+  .pz-content .pz-button { border: 1px solid LinkText; }
+  .pz-content .pz-look-panel { border: 1px solid CanvasText; }
+}
+
+/* Media. Every part is as wide as its column at most; a narrower picture sits where `align` says. */
+.pz-content :where(.pz-image, .pz-gallery, .pz-video, .pz-audio, .pz-embed) { max-inline-size: 100%; }
+.pz-content :where(.pz-image, .pz-gallery, .pz-video, .pz-audio, .pz-embed) > figcaption { margin-block-start: 6px; color: var(--c-ink-2); font-size: .882em; }
+.pz-content .pz-image img { display: block; inline-size: 100%; block-size: auto; border-radius: var(--c-radius); }
+.pz-content .pz-width-s { inline-size: 45%; }
+.pz-content .pz-width-m { inline-size: 72%; }
+.pz-content .pz-width-l { inline-size: 100%; }
+.pz-content .pz-align-center { margin-inline: auto; }
+.pz-content .pz-align-end { margin-inline-start: auto; }
+/* In a narrow column a small picture would be a thumbnail: it takes the column. */
+@container pz-content (max-width: 480px) {
+  .pz-content .pz-width-s, .pz-content .pz-width-m { inline-size: 100%; }
+}
+
+.pz-content .pz-gallery-grid { display: grid; grid-template-columns: repeat(var(--c-cols, 3), minmax(0, 1fr)); gap: 8px; }
+.pz-content .pz-cols-2 { --c-cols: 2; }
+.pz-content .pz-cols-3 { --c-cols: 3; }
+.pz-content .pz-cols-4 { --c-cols: 4; }
+.pz-content .pz-gallery .pz-image img { aspect-ratio: 4 / 3; object-fit: cover; }
+.pz-content .pz-gallery .pz-image > figcaption { font-size: .8em; }
+@container pz-content (max-width: 480px) {
+  .pz-content .pz-gallery-grid { grid-template-columns: repeat(min(2, var(--c-cols, 3)), minmax(0, 1fr)); }
+}
+
+.pz-content .pz-video video { display: block; inline-size: 100%; block-size: auto; border-radius: var(--c-radius); background: #000; }
+.pz-content .pz-audio audio { display: block; inline-size: 100%; }
+.pz-content .pz-transcript { margin-block-start: 8px; }
+.pz-content .pz-transcript > summary { inline-size: fit-content; color: var(--c-ink-2); font-size: .882em; font-weight: 600; cursor: pointer; }
+.pz-content .pz-transcript > p { margin-block-start: 6px; white-space: pre-line; }
+
+.pz-content .pz-embed-frame { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--c-radius); background: var(--c-panel); }
+.pz-content .pz-ratio-4-3 { aspect-ratio: 4 / 3; }
+.pz-content .pz-ratio-1-1 { aspect-ratio: 1; max-inline-size: 560px; }
+.pz-content .pz-ratio-9-16 { aspect-ratio: 9 / 16; max-inline-size: 360px; }
+.pz-content .pz-embed-frame iframe { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; border: 0; }
+.pz-content .pz-embed-facade > summary { inline-size: fit-content; padding: 8px 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--c-line); font-weight: 600; cursor: pointer; }
+.pz-content .pz-embed-facade[open] > summary { margin-block-end: 8px; }
+
+.pz-content .pz-file a { font-weight: 600; }
+.pz-content .pz-file-meta { color: var(--c-ink-2); font-size: .882em; }
+
+.pz-content .pz-tok-comment { color: var(--c-tok-comment); }
+.pz-content .pz-tok-string { color: var(--c-tok-string); }
+.pz-content .pz-tok-number { color: var(--c-tok-number); }
+.pz-content .pz-tok-keyword { color: var(--c-tok-keyword); }
+.pz-content .pz-tok-literal { color: var(--c-tok-literal); }
+.pz-content .pz-tok-tag { color: var(--c-tok-tag); }
+.pz-content .pz-tok-attr { color: var(--c-tok-attr); }
+.pz-content .pz-tok-property { color: var(--c-tok-property); }
+.pz-content .pz-tok-variable { color: var(--c-tok-variable); }
+.pz-content .pz-tok-function { color: var(--c-tok-function); }
+.pz-content .pz-tok-meta { color: var(--c-tok-meta); }
+.pz-content .pz-tok-comment { font-style: italic; }
+
+/* A page break (TinyMCE pagebreak): nothing on screen, a new page in print. */
+.pz-content .pz-page-break { block-size: 0; overflow: hidden; }
+@media print { .pz-content .pz-page-break { break-after: page; } }
+
+/* A table of contents: nested lists of links, quiet. */
+.pz-content .pz-toc ol { list-style: none; padding-inline-start: 0; }
+.pz-content .pz-toc ol ol { padding-inline-start: 1.2em; }
+.pz-content .pz-toc li { padding-inline-start: 0; margin-block: .2em; }

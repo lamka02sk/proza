@@ -1,0 +1,61 @@
+# A version tag (v1.0.0) publishes that version to npm once the whole CI check
+# passes. npm trusted publishing: no token is stored; npm trusts
+# this workflow through OIDC and attaches provenance. Set it up once on npmjs.com
+# (package settings, Trusted publisher: GitHub Actions, this repository, release.yml).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write   # the GitHub release
+      id-token: write   # npm trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@^11.5.1
+      - run: pnpm install --frozen-lockfile
+      - name: Tag matches package.json
+        run: test "$GITHUB_REF_NAME" = "v$(node -p 'require("./package.json").version')"
+      - run: pnpm build
+      - name: Package, size budget
+        run: pnpm package
+      - name: Frozen API
+        run: pnpm api --check
+      # A prerelease (1.1.0-rc.1) goes to the next tag, never to latest.
+      - name: Publish to npm
+        run: |
+          case "$GITHUB_REF_NAME" in
+            *-*) npm publish --tag next ;;
+            *) npm publish ;;
+          esac
+      - name: GitHub release with the changelog section
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # A release made by hand before npm was set up stays as it is.
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then exit 0; fi
+          version="${GITHUB_REF_NAME#v}"
+          awk -v head="## $version " 'index($0, head) == 1 { on = 1; next } /^## / { on = 0 } on' CHANGELOG.md > notes.md
+          test -s notes.md
+          flags=""
+          case "$version" in *-*) flags="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" --title "$version" --notes-file notes.md $flags

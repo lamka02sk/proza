@@ -1,0 +1,46 @@
+{
+  "source": "html",
+  "blocks": [
+    {
+      "type": "core/paragraph",
+      "attrs": {
+        "content": {
+          "text": "A claim that needs a source￼, and a second one￼.",
+          "formats": [
+            {
+              "type": "footnote",
+              "start": 27,
+              "end": 28,
+              "attrs": {
+                "note": "First paragraph of the note. Second paragraph of the note."
+              }
+            },
+            {
+              "type": "footnote",
+              "start": 46,
+              "end": 47,
+              "attrs": {
+                "note": "A short note."
+              }
+            }
+          ]
+        },
+        "anchor": "",
+        "textAlign": "",
+        "lang": "",
+        "dir": "",
+        "size": "",
+        "color": ""
+      }
+    }
+  ],
+  "report": [
+    {
+      "code": "footnote",
+      "severity": "info",
+      "count": 2,
+      "samples": []
+    }
+  ],
+  "pending": []
+}

@@ -1,0 +1,772 @@
+/*
+ * Editor styles, adopted into the shadow root.
+ * Content rules are in src/render/content.css, shared with published pages.
+ *
+ * Theming: every token reads a public custom
+ * property first, which crosses the shadow boundary. Light: --pz-<token>.
+ * Dark: --pz-dark-<token>. Example: proza-editor { --pz-accent: #0a7; }
+ */
+:host { all: initial; display: block; }
+
+.pz {
+  --desk: var(--pz-desk, #E8E9ED);
+  --panel: var(--pz-panel, #F7F7F9);
+  --page: var(--pz-page, #FFFFFF);
+  --ink: var(--pz-ink, #121214);
+  --ink-2: var(--pz-ink-2, #4B4C56);
+  --line: var(--pz-line, #D2D3DB);
+  --edge: var(--pz-edge, #8A8B96);
+  --hover: var(--pz-hover, rgba(18, 18, 20, .07));
+  --accent: var(--pz-accent, #FF6A2B);
+  --accent-hi: var(--pz-accent-hi, #FF7E48);
+  --accent-deep: var(--pz-accent-deep, #E4570F);
+  --accent-text: var(--pz-accent-text, #B93E0C);
+  --wash: var(--pz-wash, #FFF0E8);
+  --on: var(--pz-on, #121214);
+  --on-ink: var(--pz-on-ink, #FFFFFF);
+  --on-hover: var(--pz-on-hover, rgba(255, 255, 255, .18));
+  --blue: var(--pz-blue, #1D4ED8);
+  --danger: var(--pz-danger, #B42318);
+  --shadow: var(--pz-shadow, 0 1px 2px rgba(18, 18, 20, .06), 0 12px 30px -12px rgba(18, 18, 20, .26));
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --pz-boundary: rgba(255, 106, 43, .18);
+  /* Also the content's container in the canvas: content.css's column queries measure the field (below). */
+  container: pz pz-content / inline-size;
+  font-family: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  caret-color: var(--accent);
+  accent-color: var(--accent);
+  -webkit-font-smoothing: antialiased;
+}
+.pz.dark {
+  --desk: var(--pz-dark-desk, #09090B);
+  --panel: var(--pz-dark-panel, #151518);
+  --page: var(--pz-dark-page, #1A1A1E);
+  --ink: var(--pz-dark-ink, #F4F2EE);
+  --ink-2: var(--pz-dark-ink-2, #B9B6AF);
+  --line: var(--pz-dark-line, #34343B);
+  --edge: var(--pz-dark-edge, #77767F);
+  --hover: var(--pz-dark-hover, rgba(244, 242, 238, .1));
+  --accent-text: var(--pz-dark-accent-text, #FF8E5C);
+  --wash: var(--pz-dark-wash, #2E1C12);
+  --on: var(--pz-dark-on, #F4F2EE);
+  --on-ink: var(--pz-dark-on-ink, #121214);
+  --on-hover: var(--pz-dark-on-hover, rgba(18, 18, 20, .12));
+  --blue: var(--pz-dark-blue, #8AB4FF);
+  --danger: var(--pz-dark-danger, #FF8A80);
+  --tok-comment: var(--pz-dark-tok-comment, #A3A1AA);
+  --tok-string: var(--pz-dark-tok-string, #8FD19E);
+  --tok-number: var(--pz-dark-tok-number, #FF9E6E);
+  --tok-keyword: var(--pz-dark-tok-keyword, #D7A6FF);
+  --tok-literal: var(--pz-dark-tok-literal, #FF9E6E);
+  --tok-tag: var(--pz-dark-tok-tag, #8AB4FF);
+  --tok-attr: var(--pz-dark-tok-attr, #7FD4D6);
+  --tok-property: var(--pz-dark-tok-property, #7FD4D6);
+  --tok-variable: var(--pz-dark-tok-variable, #FDBA74);
+  --tok-function: var(--pz-dark-tok-function, #A8C1FF);
+  --tok-meta: var(--pz-dark-tok-meta, #B9B6AF);
+  --shadow: var(--pz-dark-shadow, 0 1px 2px rgba(0, 0, 0, .5), 0 12px 30px -12px rgba(0, 0, 0, .9));
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  .pz:not(.light) {
+    --desk: var(--pz-dark-desk, #09090B);
+    --panel: var(--pz-dark-panel, #151518);
+    --page: var(--pz-dark-page, #1A1A1E);
+    --ink: var(--pz-dark-ink, #F4F2EE);
+    --ink-2: var(--pz-dark-ink-2, #B9B6AF);
+    --line: var(--pz-dark-line, #34343B);
+    --edge: var(--pz-dark-edge, #77767F);
+    --hover: var(--pz-dark-hover, rgba(244, 242, 238, .1));
+    --accent-text: var(--pz-dark-accent-text, #FF8E5C);
+    --wash: var(--pz-dark-wash, #2E1C12);
+    --on: var(--pz-dark-on, #F4F2EE);
+    --on-ink: var(--pz-dark-on-ink, #121214);
+    --on-hover: var(--pz-dark-on-hover, rgba(18, 18, 20, .12));
+    --blue: var(--pz-dark-blue, #8AB4FF);
+    --danger: var(--pz-dark-danger, #FF8A80);
+    --tok-comment: var(--pz-dark-tok-comment, #A3A1AA);
+    --tok-string: var(--pz-dark-tok-string, #8FD19E);
+    --tok-number: var(--pz-dark-tok-number, #FF9E6E);
+    --tok-keyword: var(--pz-dark-tok-keyword, #D7A6FF);
+    --tok-literal: var(--pz-dark-tok-literal, #FF9E6E);
+    --tok-tag: var(--pz-dark-tok-tag, #8AB4FF);
+    --tok-attr: var(--pz-dark-tok-attr, #7FD4D6);
+    --tok-property: var(--pz-dark-tok-property, #7FD4D6);
+    --tok-variable: var(--pz-dark-tok-variable, #FDBA74);
+    --tok-function: var(--pz-dark-tok-function, #A8C1FF);
+    --tok-meta: var(--pz-dark-tok-meta, #B9B6AF);
+    --shadow: var(--pz-dark-shadow, 0 1px 2px rgba(0, 0, 0, .5), 0 12px 30px -12px rgba(0, 0, 0, .9));
+    color-scheme: dark;
+  }
+}
+.pz *, .pz *::before, .pz *::after { box-sizing: border-box; }
+.pz ::selection { background: rgba(255, 106, 43, .34); }
+.pz :focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+/* A field shows focus through the field border, like a form control. */
+.pz [contenteditable]:focus-visible { outline: none; }
+/* :where keeps this reset weaker than any component rule, so a button's own colour always wins. */
+.pz :where(button, input, textarea, select) { font: inherit; color: inherit; }
+.pz :where(h2, h3, p, dl, dd) { margin: 0; }
+.vh { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ------------------------------------------------------------------------
+   The field: one bordered control in the host's form. */
+.ed { position: relative; display: flex; flex-direction: column; border: 1px solid var(--edge); border-radius: 10px; background: var(--page); color: var(--ink); transition: border-color .15s; }
+.ed:focus-within { border-color: var(--ink); outline: 1px solid var(--ink); }
+/* Expanded: the field in the top layer, filling the viewport. */
+.ed:popover-open { position: fixed; inset: 0; inline-size: auto; block-size: auto; max-inline-size: none; max-block-size: none; margin: 0; padding: 0; border-radius: 0; overflow: hidden; }
+.ed:popover-open > .work { flex: 1 1 auto; overflow: auto; }
+.ed:popover-open > .work > .pz-canvas { max-inline-size: 840px; margin-inline: auto; }
+.ed::backdrop { background: var(--desk); }
+/* A fixed height (TinyMCE autoresize off): the text scrolls, the status line stays at the bottom. */
+.ed.is-fixed { block-size: var(--pz-height); }
+.ed.is-fixed > .work { flex: 1 1 auto; min-block-size: 0; overflow: auto; }
+.ed.is-readonly { border-style: dashed; }
+/* A draft from an earlier visit (draft recovery): above the text, until answered. */
+.note { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding: 7px 8px 7px 12px; padding-inline: 12px 8px; border-block-end: 1px solid var(--line); border-radius: 9px 9px 0 0; background: var(--wash); font-size: 13px; color: var(--ink); }
+.note-text { flex: 1 1 16em; font-weight: 600; }
+.note + .work { border-radius: 0; }
+
+.work { position: relative; border-radius: 9px 9px 0 0; background: var(--page); transition: background-color .3s, padding .55s var(--ease); scroll-padding-block-end: 64px; }
+.work.is-preview { padding: 14px 0; background: var(--desk); }
+/* The text column is as wide as the device; the gutter for the part tools comes on top. */
+.work.is-preview > .pz-canvas { box-sizing: content-box; inline-size: var(--pz-device, 390px); max-inline-size: calc(100% - 86px); margin-inline: auto; border-radius: 6px; box-shadow: var(--shadow); }
+.work.is-tablet { --pz-device: 768px; }
+.work.is-phone { --pz-device: 390px; }
+.work.is-phone > .pz-canvas { font-size: 16px; }
+.work.is-dragging { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+
+/* ------------------------------------------------------------------------
+   The canvas. The 60px start gutter holds the part tools. */
+.pz-canvas { min-block-size: 150px; padding: 16px 26px 20px 60px; padding-inline: 60px 26px; border-radius: 9px 9px 0 0; background: var(--page); font-size: 17px; line-height: 1.6; overflow-wrap: break-word; transition: margin .55s var(--ease), padding .55s var(--ease); }
+.pz-canvas.is-selecting, .pz-canvas.is-selecting * { user-select: none; -webkit-user-select: none; }
+
+/* Content as published comes from src/render/content.css (the canvas is a .pz-content). */
+/* The canvas is not a size container: a second container around 2,000 parts doubled the cost of Enter and of
+   selecting all. Its column queries follow the field instead (.pz is also named pz-content),
+   and cqi units resolve there. Nor is it a grid: wide and full parts have no wider page to go to here. */
+.pz-canvas.pz-content { container-type: normal; display: block; }
+/* Device preview: the canvas is narrowed to a device's width and becomes the container, so the content
+   answers that width as it will on the device. Only while previewing, so typing keeps its speed otherwise. */
+.work.is-preview > .pz-canvas.pz-content { container-type: inline-size; }
+.pz-canvas [data-field][data-type="core/paragraph"], .pz-canvas .pz-t-paragraph > [data-field] { min-block-size: 1.6em; }
+
+/* An empty field says what it is for. The float keeps the caret at the start. */
+.pz-canvas [data-empty][data-placeholder]::before { content: attr(data-placeholder); float: inline-start; block-size: 0; color: var(--ink-2); pointer-events: none; }
+
+/* Parts. They bleed 10px into the gutter so the wash has room around the text. */
+.pz-block { position: relative; margin-inline: -10px; padding: 4px 10px; border-radius: 6px; }
+.pz-block + .pz-block { margin-block-start: 6px; }
+.pz-canvas > .pz-t-heading { margin-block-start: 16px; }
+.pz-canvas > .pz-t-heading:first-child { margin-block-start: 0; }
+/* Off-screen parts skip rendering, selected ones too: nothing of a part hangs
+   outside its box (the stems are drawn by the tools layer), so paint containment clips nothing.
+   Not virtual scrolling: find, selection and reading order stay intact. */
+.pz-canvas > .pz-block { content-visibility: auto; contain-intrinsic-size: auto 1.6em; }
+/* A list part keeps the indent its markers hang in. */
+:is(ul, ol).pz-block { padding-inline-start: calc(10px + 1.2em); }
+/* List items and quote children sit inside their container's padding. */
+li.pz-block { margin-inline: 0; padding-inline: .2em 0; }
+.pz-block .pz-block { padding-block: 2px; }
+.pz-table :is(th, td).pz-block { padding: 4px 8px; }
+.pz-table :is(th, td) > .pz-block { margin-inline: 0; padding-inline: 0; }
+
+/* Hover is a faint version of the selection colour on the part (a top-level block).
+   No transition: selecting all parts would start one per part. */
+.pz-canvas > .pz-block:hover { background: color-mix(in srgb, var(--wash) 45%, transparent); }
+/* The part you are on, and selected parts, take the wash. */
+/* After hover and as specific, so hovering a selected part keeps its full wash. */
+.has-tools > .pz-block.is-current, .pz-canvas > .pz-block.is-selected, .pz-block .pz-block.is-selected { background: var(--wash); }
+/* Nested selections stay within their boxes. Only the part has stems in the gutter. */
+.pz-block .pz-block.is-selected { outline: 1px solid var(--edge); outline-offset: -1px; }
+.pz-block.is-selected:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.pz-block .pz-block.is-selected:focus-visible { outline-offset: -2px; }
+
+/* The stems draw down by scaling, which the compositor runs without a frame of the page:
+   at 2,000 parts a painted animation cost every frame its style and intersection work. */
+@keyframes pz-stem { from { transform: scaleY(0); } }
+
+/* A part being dragged lifts; an orange line shows where it will land. */
+.pz-block[data-drag] { z-index: 7; background: var(--page); box-shadow: var(--shadow); }
+
+/* A separator is chosen as a whole; give it a target the size of a line. */
+.pz-t-separator { padding-block: 10px; cursor: default; }
+
+.pz-unsupported { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1.5px dashed var(--edge); border-radius: 8px; color: var(--ink-2); font-size: 15px; }
+.pz-unsupported strong { color: var(--ink); font-weight: 600; }
+
+/* ------------------------------------------------------------------------
+   Media parts in the canvas. */
+/* Checklist items: the box beside the text, nested lists under the text. */
+li.pz-check-item { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: .55em; align-items: baseline; }
+li.pz-check-item > :not(.pz-check) { grid-column: 2; }
+.pz-check { inline-size: 1em; block-size: 1em; margin: 0; translate: 0 .14em; accent-color: var(--accent-deep); cursor: pointer; }
+li.pz-check-item.is-done > [data-field] { color: var(--ink-2); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--ink-2) 60%, transparent); }
+
+.drop { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; padding: 22px 16px; border: 1.5px dashed var(--edge); border-radius: 8px; color: var(--ink-2); font-size: 15px; line-height: 1.4; transition: border-color .15s, background-color .15s; }
+.drop > .ic { inline-size: 24px; block-size: 24px; }
+.drop .btn { color: var(--ink); }
+.drop.is-over { border-color: var(--accent-deep); border-style: solid; background: var(--wash); }
+.drop.is-error { border-color: var(--danger); }
+.drop.is-compact { flex-direction: column; justify-content: center; gap: 6px; min-block-size: 100%; padding: 10px; font-size: 13px; }
+.drop.is-compact .btn { block-size: 30px; font-size: 13px; }
+.drop-error { flex-basis: 100%; margin: 0; color: var(--danger); font-weight: 600; text-align: center; }
+.drop-url { display: flex; flex-wrap: wrap; gap: 6px; flex-basis: 100%; max-inline-size: 420px; }
+.drop-url .field { flex: 1 1 200px; }
+.drop-url .hint { flex-basis: 100%; }
+.drop-form { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 6px; text-align: start; }
+.drop-form .btn-add { align-self: flex-start; margin-block-start: 6px; }
+
+.pz-upload { display: grid; gap: 8px; padding: 16px; border-radius: 8px; background: var(--panel); font-size: 14px; }
+.pz-upload.is-compact { padding: 10px; font-size: 12px; }
+.pz-upload > .btn { justify-self: start; }
+.pz-upload-name { display: flex; align-items: center; gap: 8px; min-inline-size: 0; font-weight: 600; }
+.pz-upload-name > span:first-of-type { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pz-upload-pct { margin-inline-start: auto; color: var(--ink-2); font-weight: 400; }
+.pz-meter { position: relative; block-size: 6px; overflow: hidden; border-radius: 3px; background: var(--hover); }
+.pz-meter > span { position: absolute; inset-block: 0; inset-inline-start: 0; inline-size: 0; border-radius: 3px; background: var(--ink); transition: inline-size .3s var(--ease); }
+/* No progress reported yet: a short bar travels, so the part never looks stuck. */
+.pz-meter.is-waiting > span { inline-size: 30%; animation: pz-wait 1.2s var(--ease) infinite alternate; }
+@keyframes pz-wait { from { translate: -100% 0; } to { translate: 340% 0; } }
+
+/* A picture, video or card, with the prompt it still needs laid over its corner. */
+.pz-frame { position: relative; }
+.pz-img { display: block; inline-size: 100%; block-size: auto; border-radius: 5px; animation: pz-pic .8s var(--ease); }
+/* A new picture reveals from the start edge (design: Motion). */
+@keyframes pz-pic { from { clip-path: inset(0 100% 0 0 round 5px); filter: saturate(0) blur(6px); } }
+[dir="rtl"] .pz-img { animation-name: pz-pic-rtl; }
+@keyframes pz-pic-rtl { from { clip-path: inset(0 0 0 100% round 5px); filter: saturate(0) blur(6px); } }
+.pz-media { display: block; inline-size: 100%; border-radius: 5px; }
+video.pz-media { background: #000; }
+.pz-notice { position: absolute; inset-block-end: 10px; inset-inline-start: 10px; display: inline-flex; align-items: center; gap: 8px; min-block-size: 32px; padding: 0 14px 0 12px; padding-inline: 12px 14px; border: 0; border-radius: 999px; background: var(--on); color: var(--on-ink); box-shadow: var(--shadow); font-size: 13px; font-weight: 600; cursor: pointer; transition: transform .15s var(--ease); }
+.pz-notice::before { content: ""; inline-size: 7px; block-size: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.pz-notice:hover { background: color-mix(in srgb, var(--on) 86%, var(--accent)); }
+.pz-notice:active { transform: scale(.95); }
+.pz-notice:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.pz-frame-audio .pz-notice, .pz-embed-card .pz-notice { position: static; justify-self: start; }
+.pz-frame-audio { display: grid; gap: 8px; }
+.pz-gallery .pz-notice { inset-block-end: 6px; inset-inline-start: 6px; min-block-size: 26px; padding-inline: 8px 10px; font-size: 12px; }
+.pz-canvas :where(.pz-image, .pz-gallery, .pz-video, .pz-audio, .pz-embed) > .pz-caption { margin-block-start: 6px; color: var(--ink-2); font-size: 15px; }
+.pz-transcript-field { margin-block-start: 8px; padding: 8px 10px; border-radius: 6px; background: var(--panel); font-size: 15px; white-space: pre-wrap; }
+
+.pz-canvas .pz-gallery-grid { align-items: start; }
+.pz-gallery .pz-block { margin: 0; padding: 0; }
+.pz-gallery .pz-image.is-selected { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 5px; }
+
+.pz-embed-card { display: grid; align-content: end; gap: 10px; aspect-ratio: 16 / 9; padding: 16px; border-radius: 5px; background: var(--on); color: var(--on-ink); }
+.pz-embed-card.pz-ratio-9-16 { max-inline-size: 360px; }
+.pz-embed-card.pz-ratio-1-1 { max-inline-size: 560px; }
+.pz-embed-play { justify-self: start; display: inline-flex; align-items: center; justify-content: center; inline-size: 52px; block-size: 52px; border: 0; border-radius: 50%; background: var(--accent); color: #121214; cursor: pointer; transition: transform .2s var(--ease), background-color .15s; }
+.pz-embed-play .ic { inline-size: 22px; block-size: 22px; fill: currentColor; }
+.pz-embed-play:hover { background: var(--accent-hi); transform: scale(1.06); }
+.pz-embed-play:focus-visible { outline: 2px solid var(--on-ink); outline-offset: 2px; }
+.pz-embed-meta { display: grid; gap: 2px; min-inline-size: 0; }
+.pz-embed-meta strong { font-size: 17px; line-height: 1.3; }
+.pz-embed-meta span, .pz-embed-url { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: color-mix(in srgb, var(--on-ink) 75%, transparent); font-size: 13px; }
+.pz-embed-url { flex-basis: 100%; color: var(--ink-2); text-align: center; }
+
+.pz-file-card { display: inline-flex; align-items: center; gap: 10px; max-inline-size: 100%; padding: 10px 14px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); }
+.pz-file-card .ic { color: var(--accent-text); }
+.pz-file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent-text); font-weight: 600; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.pz-canvas .pz-file-meta { flex: none; color: var(--ink-2); font-size: 14px; }
+
+/* ------------------------------------------------------------------------
+   Tables in the canvas: a grid with an "Add row" strip under it and an
+   "Add column" strip beside it, the active cell ringed in ink, selected cells in the wash. */
+.pz-canvas .pz-table { overflow: visible; }
+.tb { display: grid; grid-template-columns: minmax(0, 1fr) 22px; gap: 4px; }
+.tb-scroll { min-inline-size: 0; overflow-x: auto; }
+.pz-canvas .pz-table :is(th, td).pz-block { margin: 0; padding: 6px 10px; border-radius: 0; background: var(--page); }
+.pz-canvas .pz-table th.pz-block { background: var(--panel); }
+.pz-canvas .pz-table :is(th, td) > .pz-block + .pz-block { margin-block-start: 4px; }
+.pz-canvas .pz-table caption { padding-block-end: 2px; }
+.has-tools .pz-table :is(th, td).is-current { box-shadow: inset 0 0 0 2px var(--ink); }
+.pz-canvas .pz-table :is(th, td).pz-block.is-selected { outline: 0; background: color-mix(in srgb, var(--accent) 24%, var(--page)); }
+.pz-canvas .pz-table :is(th, td).pz-block.is-selected:focus-visible { outline: 0; box-shadow: inset 0 0 0 2px var(--ink); }
+.tadd { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0; border: 0; border-radius: 6px; background: var(--hover); color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; opacity: 0; transition: opacity .15s, background-color .15s, color .15s; }
+.pz-table:hover .tadd, .pz-table.is-current .tadd, .pz-table.is-selected .tadd, .tadd:focus-visible { opacity: 1; }
+.tadd:hover { background: var(--accent-deep); color: #FFFFFF; }
+.tadd:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.tadd .ic { inline-size: 14px; block-size: 14px; stroke-width: 2.5; }
+.tadd-col { grid-row: 1; grid-column: 2; }
+.tadd-row { grid-column: 1; block-size: 24px; }
+
+/* The cell tools: a small inverted bar above the active cell, with the Row and Column menus. */
+.cellbar { position: absolute; z-index: 5; display: flex; gap: 2px; padding: 3px; border-radius: 10px; background: var(--on); color: var(--on-ink); box-shadow: var(--shadow); translate: 0 calc(-100% - 6px); transform-origin: bottom left; animation: pz-pop .24s var(--ease); }
+.cellbar.at-end { transform-origin: bottom right; }
+.cellbar { transition: opacity .15s; }
+.cellbar.is-away { opacity: 0; pointer-events: none; }
+[dir="rtl"] .cellbar { transform-origin: bottom right; }
+[dir="rtl"] .cellbar.at-end { transform-origin: bottom left; }
+.cellbar .btn { block-size: 30px; gap: 4px; padding: 0 6px; padding-inline: 10px 6px; color: inherit; }
+.cellbar .btn .ic { inline-size: 16px; block-size: 16px; }
+.cellbar .btn:hover { background: var(--on-hover); }
+.cellbar .btn[aria-expanded="true"], .cellbar .btn[data-state="open"] { background: var(--accent); color: #121214; }
+.cellbar :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ------------------------------------------------------------------------
+   Layout parts in the canvas. Columns show their edges while you are in them. */
+.pz-canvas .pz-columns.pz-block { padding-block: 4px; }
+.pz-canvas .pz-column.pz-block { margin: 0; padding: 4px 6px; min-block-size: 2.4em; }
+.pz-canvas .pz-columns:is(.is-current, .is-selected, :hover) > .pz-column { box-shadow: inset 0 0 0 1px var(--line); }
+.pz-canvas .pz-column.pz-block.is-selected { outline-offset: -1px; }
+.pz-canvas .pz-column > .pz-block { margin-inline: 0; }
+.pz-canvas .pz-group:not(.pz-look-panel, .pz-look-line):is(.is-current, :hover) { outline: 1px dashed var(--line); outline-offset: -1px; }
+.pz-canvas .pz-group > .pz-block, .pz-canvas .pz-details-body > .pz-block { margin-inline: 0; }
+.pz-summary { display: flex; align-items: baseline; gap: 6px; font-weight: 600; }
+.pz-summary-mark { flex: none; display: inline-flex; color: var(--accent-text); }
+.pz-summary-mark .ic { inline-size: 16px; block-size: 16px; translate: 0 2px; transition: rotate .2s var(--ease); }
+.pz-details:not(.is-open) .pz-summary-mark .ic { rotate: -90deg; }
+[dir="rtl"] .pz-details:not(.is-open) .pz-summary-mark .ic { rotate: 90deg; }
+.pz-summary-text { flex: 1 1 auto; min-inline-size: 0; }
+.pz-canvas .pz-details-body { padding-inline-start: 22px; }
+.pz-canvas .pz-buttons { align-items: center; }
+.pz-canvas .pz-button-part.pz-block { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 2px; }
+.pz-canvas .pz-button { cursor: text; }
+.pz-button-text { min-inline-size: 5ch; }
+.pz-canvas .pz-button-fill [data-empty][data-placeholder]::before { color: color-mix(in srgb, var(--page) 78%, transparent); }
+.pz-notice.pz-notice-inline { position: static; }
+.pz-add-button { display: inline-flex; align-items: center; justify-content: center; inline-size: 32px; block-size: 32px; padding: 0; border: 1.5px dashed var(--edge); border-radius: 8px; background: transparent; color: var(--ink-2); cursor: pointer; opacity: 0; transition: opacity .15s, background-color .15s, color .15s; }
+.pz-buttons:is(.is-current, :hover) > .pz-add-button, .pz-add-button:focus-visible { opacity: 1; }
+.pz-add-button:hover { border-style: solid; border-color: var(--accent-deep); background: var(--accent-deep); color: #FFFFFF; }
+.pz-add-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+/* A space has nothing to show but its height: a faint hatch marks it in the canvas, never on the page. */
+.pz-canvas .pz-spacer.pz-block { padding: 0; background-image: repeating-linear-gradient(-45deg, transparent 0 7px, var(--hover) 7px 8px); }
+.pz-canvas .pz-spacer.pz-block.is-selected { background-color: var(--wash); }
+
+/* The path from columns or a group to the part inside, at the top of the part options. */
+.opt-path { display: flex; flex-wrap: wrap; gap: 2px; padding-block-end: 6px; margin-block-end: 2px; border-block-end: 1px solid var(--line); }
+.menu-text { display: inline-flex; align-items: baseline; gap: 8px; }
+.menu-meta { color: var(--ink-2); font-size: 12px; }
+
+/* ------------------------------------------------------------------------
+   Controls */
+.ic { inline-size: 18px; block-size: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.btn { display: inline-flex; align-items: center; gap: 8px; block-size: 36px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color .15s, color .15s, transform .15s var(--ease); }
+.btn:hover { background: var(--hover); }
+.btn:active { transform: scale(.95); }
+.btn.is-on { background: var(--on); color: var(--on-ink); }
+.btn[disabled], .btn[data-disabled] { opacity: .38; cursor: default; }
+.btn[disabled]:hover { background: transparent; }
+.btn[disabled]:active { transform: none; }
+.btn-icon { inline-size: 36px; padding: 0; justify-content: center; }
+.btn-s { block-size: 28px; padding: 0 6px; border-radius: 6px; font-size: 13px; }
+.btn-s.btn-icon { inline-size: 28px; padding: 0; }
+.btn-s .ic { inline-size: 16px; block-size: 16px; }
+.btn-line { box-shadow: inset 0 0 0 1px var(--edge); }
+.btn-add { justify-content: center; background: var(--accent); color: #121214; }
+.btn-add:hover { background: var(--accent-hi); }
+.btn kbd { margin-inline-start: auto; padding: 0 5px; border: 1px solid var(--line); border-radius: 4px; font: 12px/18px ui-monospace, monospace; color: var(--ink-2); }
+.glyph { inline-size: 18px; font: 700 17px/1 Georgia, serif; text-align: center; }
+.glyph-i { font-weight: 400; font-style: italic; }
+.lab { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.hint { margin: 0; font-size: 13px; color: var(--ink-2); }
+.hint.is-error { color: var(--danger); font-weight: 600; }
+.sep { inline-size: 1px; block-size: 16px; margin: 0 4px; background: var(--line); flex: none; }
+.seg { display: flex; gap: 2px; padding: 2px; border-radius: 8px; background: var(--hover); }
+.seg .btn { flex: 1 1 0; justify-content: center; block-size: 30px; padding: 0 8px; border-radius: 6px; font-size: 13px; }
+.seg .btn-icon { inline-size: auto; }
+.seg .btn:hover { background: transparent; }
+.seg .btn.is-on { background: var(--page); color: var(--ink); box-shadow: 0 1px 2px rgba(18, 18, 20, .2); }
+.field { inline-size: 100%; block-size: 34px; padding: 0 10px; border: 0; border-radius: 8px; background: var(--page); color: var(--ink); box-shadow: inset 0 0 0 1px var(--edge); font-size: 14px; }
+.field::placeholder { color: var(--ink-2); }
+.field[aria-invalid="true"] { box-shadow: inset 0 0 0 2px var(--danger); }
+.field-select { appearance: auto; }
+textarea.field { block-size: auto; padding: 8px 10px; resize: vertical; }
+.field.code { font: 12.5px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+.check { display: flex; align-items: center; justify-content: flex-start; gap: 8px; font-weight: 600; cursor: pointer; }
+.check input { inline-size: 18px; block-size: 18px; margin: 0; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-block-size: 38px; padding: 0 6px; }
+.row > .seg { flex: 0 1 auto; }
+.row-col { flex-direction: column; align-items: stretch; justify-content: center; gap: 5px; padding: 6px; }
+.rule { block-size: 1px; margin: 4px 0; background: var(--line); flex: none; }
+.sws { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 2px; }
+.sw { inline-size: 24px; block-size: 24px; padding: 0; border: 0; border-radius: 50%; background: currentColor; box-shadow: inset 0 0 0 1px rgba(128, 128, 128, .5); cursor: pointer; transition: transform .15s var(--ease); }
+.sw-default { color: var(--ink); }
+.sw:hover { transform: scale(1.1); }
+.sw.is-on { outline: 2px solid var(--ink); outline-offset: 2px; }
+.check.has-hint { align-items: flex-start; }
+.check.has-hint input { margin-block-start: 1px; }
+.check-text { display: grid; gap: 2px; }
+.check-text .hint { font-weight: 400; }
+.insp-item { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; padding: 6px; border-block-start: 1px solid var(--line); }
+.insp-thumb { inline-size: 52px; block-size: 52px; border-radius: 5px; object-fit: cover; }
+.insp-item-rows { display: flex; flex-direction: column; }
+.insp-item-rows .row { padding-inline: 0; }
+.pair { display: flex; gap: 2px; }
+.pair .btn { flex: 1 1 0; }
+.only-s { display: none; }
+
+/* ------------------------------------------------------------------------
+   Menus (Reka UI popovers, positioned by floating-ui). */
+/* A menu never runs off screen: it is as tall as the room on its side (floating-ui's size), then scrolls. */
+.pop { z-index: 20; display: flex; flex-direction: column; gap: 2px; min-inline-size: 190px; max-block-size: min(560px, var(--reka-popover-content-available-height, var(--reka-dropdown-menu-content-available-height, 70vh))); overflow: auto; padding: 4px; border-radius: 10px; background: var(--page); box-shadow: 0 0 0 1px var(--line), var(--shadow); font-size: 14px; line-height: 1.4; color: var(--ink); transform-origin: var(--reka-popover-content-transform-origin, var(--reka-dropdown-menu-content-transform-origin, top left)); animation: pz-pop .24s var(--ease); }
+.pop:focus-visible { outline: none; }
+/* A long menu scrolls; its rows keep their height instead of shrinking to fit. */
+.pop > *, .pop .insp > *, .pop .more > * { flex-shrink: 0; }
+.pop-pad { gap: 8px; inline-size: 300px; padding: 12px; }
+.pop-add { gap: 10px; inline-size: 448px; padding: 10px; }
+.pop-blk { inline-size: 300px; padding: 6px; }
+.pop-outline { inline-size: 340px; padding: 10px; }
+.pop-menu { min-inline-size: 220px; }
+.pop-lab { padding: 6px 10px 2px; }
+.pop-title { font-size: 15px; }
+.pop-text { margin: 0; }
+.pop .btn { justify-content: flex-start; }
+.pop .seg .btn, .pop .btn-add { justify-content: center; }
+.pop [role="menuitem"] { outline: none; }
+.pop [role="menuitem"][data-highlighted] { background: var(--hover); box-shadow: inset 0 0 0 2px var(--ink); }
+.pop [role="menuitem"] .ic:last-child:not(:first-child) { margin-inline-start: auto; }
+.btn-more { justify-content: space-between; color: var(--ink-2); }
+.btn-more .ic { transition: transform .2s var(--ease); }
+.btn-more[aria-expanded="true"] .ic { transform: rotate(180deg); }
+.more { display: flex; flex-direction: column; gap: 2px; }
+.insp { display: contents; }
+@keyframes pz-pop { from { opacity: 0; transform: scale(.94) translateY(-6px); } }
+
+/* Add menu */
+.search { position: relative; }
+.search .ic { position: absolute; inset-inline-start: 9px; inset-block-start: 8px; color: var(--ink-2); pointer-events: none; }
+.search .field { padding-inline-start: 34px; }
+.add-list { display: flex; flex-direction: column; gap: 8px; }
+.add-group { display: flex; flex-direction: column; gap: 4px; }
+.add-group .pop-lab { padding: 0 2px; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.tile { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 8px; border-radius: 8px; background: var(--page); box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; font-weight: 600; text-align: start; cursor: pointer; transition: box-shadow .15s; animation: pz-tile .45s var(--ease) backwards; }
+.tile:hover { box-shadow: inset 0 0 0 2px var(--ink); }
+.tile.is-active { box-shadow: inset 0 0 0 2px var(--accent); }
+.tile.is-active:hover { box-shadow: inset 0 0 0 2px var(--accent), inset 0 0 0 3px var(--ink); }
+.tile:nth-child(2) { animation-delay: .025s; }
+.tile:nth-child(3) { animation-delay: .05s; }
+.tile:nth-child(4) { animation-delay: .075s; }
+.tile:nth-child(5) { animation-delay: .1s; }
+.tile:nth-child(6) { animation-delay: .125s; }
+.tile:nth-child(7) { animation-delay: .15s; }
+.tile:nth-child(n+8) { animation-delay: .175s; }
+@keyframes pz-tile { from { opacity: 0; transform: translateY(8px) scale(.95); } }
+.mini { inline-size: 100%; block-size: 34px; fill: none; stroke: var(--ink-2); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.mini .a { stroke: var(--accent); }
+.mini .af { fill: var(--accent); stroke: none; }
+
+/* ------------------------------------------------------------------------
+   Part tools: beside the part you are on, and beside the part under the pointer. */
+.gut { position: absolute; z-index: 3; display: flex; align-items: flex-start; gap: 2px; inline-size: 50px; padding-inline-end: 1px; }
+.gut.is-hover { opacity: .9; }
+.cfg { display: inline-flex; align-items: center; justify-content: center; inline-size: 24px; block-size: 24px; margin-block-start: 5px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--ink-2); cursor: pointer; transition: background-color .15s, color .15s; }
+.cfg .ic { inline-size: 17px; block-size: 17px; }
+.cfg:hover { background: var(--hover); color: var(--ink); }
+.cfg.is-on { background: var(--on); color: var(--on-ink); }
+/* The two stems of the Proza mark beside the part you are on, or along the selected parts. */
+.stems { position: absolute; z-index: 2; display: flex; gap: 4px; inline-size: 12px; padding-block: 4px; pointer-events: none; }
+.stems span { inline-size: 4px; border-radius: 1px; background: var(--accent); transform-origin: top; animation: pz-stem .5s var(--ease) both; }
+.stems span + span { animation-delay: .07s; }
+/* The handle over the stems: the stems layer draws them, this takes the click and the drag. */
+.legs { align-self: stretch; inline-size: 20px; min-block-size: 24px; padding: 0; border: 0; border-radius: 4px; background: none; cursor: grab; touch-action: none; transition: background-color .15s; }
+.legs:hover, .legs[aria-expanded="true"] { background: var(--hover); }
+.work.is-dragging .legs { cursor: grabbing; }
+/* The plus sits on the end corner of the part, where the new part will appear. A 5px ring around
+   the 26px circle also takes the pointer. The plus sign is two 12 by 2 px bars on whole pixels. */
+.plus { position: absolute; z-index: 2; inline-size: 36px; block-size: 36px; margin: 0; padding: 0; border: 5px solid transparent; border-radius: 50%; background: var(--accent-deep) padding-box; color: #FFFFFF; cursor: pointer; transition: background-color .15s; --turn: 0deg; }
+.plus:hover { background-color: var(--accent-text); }
+.plus::before, .plus::after, .plus-chip::before, .plus-chip::after { content: ""; position: absolute; inset-block-start: 50%; inset-inline-start: 50%; inline-size: 12px; block-size: 2px; margin: -1px 0 0 -6px; border-radius: 1px; background: currentColor; transform: rotate(var(--turn)); transition: transform .4s var(--ease); }
+.plus::after, .plus-chip::after { transform: rotate(calc(var(--turn) + 90deg)); }
+.plus:hover, .btn-end:hover .plus-chip { --turn: 90deg; }
+.plus[aria-expanded="true"], .btn-end.is-on .plus-chip { --turn: 45deg; }
+.plus:focus-visible { outline: 2px solid var(--ink); outline-offset: 0; }
+.dropline { position: absolute; inset-inline: 50px 16px; z-index: 4; block-size: 3px; border-radius: 2px; background: var(--accent); pointer-events: none; transition: inset-block-start .14s var(--ease); }
+
+/* Always there under the text: the obvious way to add something, in words. */
+.appender { padding: 0 26px 12px 56px; padding-inline: 56px 26px; font-size: 14px; line-height: 1.4; }
+.btn-end { padding: 0 12px 0 4px; padding-inline: 4px 12px; color: var(--ink-2); }
+.btn-end.is-on { background: var(--hover); color: var(--ink); }
+.plus-chip { position: relative; display: inline-block; flex: none; inline-size: 24px; block-size: 24px; border-radius: 6px; background: var(--accent-deep); color: #FFFFFF; --turn: 0deg; }
+.starter { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 0 26px 10px 60px; padding-inline: 60px 26px; font-size: 14px; }
+
+/* ------------------------------------------------------------------------
+   The format bar. As a bubble: above the selected words, and nowhere else. */
+.bubble { z-index: 6; display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 10px; background: var(--on); color: var(--on-ink); box-shadow: var(--shadow); }
+.bubble[hidden] { display: none; }
+.bubble .btn { block-size: 32px; }
+.bubble .btn-icon { inline-size: 34px; }
+.bubble .btn:hover { background: var(--on-hover); }
+.bubble .btn.is-on, .bubble .btn-add { background: var(--accent); color: #121214; }
+.bubble .field { inline-size: 210px; block-size: 32px; box-shadow: none; }
+.bubble :focus-visible { outline-color: var(--accent); }
+.bubble .sep { background: var(--on-hover); }
+.bubble-error { position: absolute; inset-block-start: calc(100% + 6px); inset-inline-start: 0; max-inline-size: 300px; padding: 6px 10px; border-radius: 8px; background: var(--page); color: var(--danger); box-shadow: 0 0 0 1px var(--line), var(--shadow); font-size: 13px; font-weight: 600; }
+/* Link search under the link field (`links`). */
+.link-results { position: absolute; inset-block-start: calc(100% + 6px); inset-inline-start: 0; z-index: 7; inline-size: min(380px, calc(100cqw - 16px)); padding: 4px; border-radius: 10px; background: var(--page); color: var(--ink); box-shadow: 0 0 0 1px var(--line), var(--shadow); animation: pz-pop .24s var(--ease); }
+.link-results ul { margin: 0; padding: 0; list-style: none; max-block-size: 260px; overflow: auto; }
+.link-opt { display: grid; gap: 1px; padding: 7px 10px; border-radius: 8px; cursor: pointer; }
+.link-opt:hover { background: var(--hover); }
+.link-opt.is-active { background: var(--hover); box-shadow: inset 0 0 0 2px var(--ink); }
+.link-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.link-url { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); font-size: 12.5px; }
+.link-status { padding: 6px 10px; }
+.fmt-bubble { position: absolute; transform: translate(-50%, calc(-100% - 8px)); transform-origin: bottom center; animation: pz-bubble .3s var(--ease); }
+[dir="rtl"] .fmt-bubble { transform: translate(50%, calc(-100% - 8px)); }
+.fmt-bubble.is-below { transform: translate(-50%, 8px); transform-origin: top center; }
+[dir="rtl"] .fmt-bubble.is-below { transform: translate(50%, 8px); }
+@keyframes pz-bubble { from { opacity: 0; scale: .9; } }
+/* Docked: a bar at the top of the field (an option). */
+.fmt-docked { position: sticky; inset-block-start: 0; z-index: 5; flex-wrap: wrap; margin: 6px 6px 0; }
+.fmt-docked[hidden] { display: flex; visibility: hidden; }
+/* Touch: above the on-screen keyboard, in the top layer. */
+.fmt-touch:popover-open { position: fixed; inset: auto 8px 8px; inset-block-end: 8px; margin: 0; padding: 4px; border: 0; justify-content: flex-start; overflow-x: auto; }
+.fmt-touch .btn { block-size: 44px; }
+.fmt-touch .btn-icon { inline-size: 44px; }
+.is-touch .work { scroll-padding-block-end: 120px; }
+.fmt-sample { inline-size: 22px; font-weight: 400; text-align: center; }
+.fmt-underline { text-decoration: underline; }
+.fmt-strikethrough { text-decoration: line-through; }
+.fmt-code { font-family: ui-monospace, monospace; font-size: 12px; }
+.fmt-superscript, .fmt-subscript { font-size: 11px; }
+.fmt-superscript { vertical-align: super; }
+.fmt-subscript { vertical-align: sub; }
+
+/* ------------------------------------------------------------------------
+   The status line: what you are on, what just happened, and the way back. Sticky while a long text scrolls. */
+.status { position: sticky; inset-block-end: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 4px 12px; min-block-size: 35px; padding: 3px 4px 3px 12px; padding-inline: 12px 4px; border-block-start: 1px solid var(--line); border-radius: 0 0 9px 9px; background: var(--panel); font-size: 13px; color: var(--ink-2); }
+.ed:popover-open .status { border-radius: 0; }
+.status-l { flex: 1 1 0; min-inline-size: 0; overflow: hidden; }
+.status-r { display: flex; align-items: center; gap: 1px; flex: none; }
+.msg { display: flex; align-items: center; gap: 8px; min-inline-size: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: pz-msg .45s var(--ease); }
+.msg > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.msg strong { color: var(--ink); }
+.msg-on { color: var(--ink); font-weight: 600; }
+.msg-on::before { content: ""; inline-size: 7px; block-size: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+.msg .btn { flex: none; }
+@keyframes pz-msg { from { opacity: 0; transform: translateY(12px); filter: blur(4px); } }
+
+/* Outline (list view) */
+.outline { display: flex; flex-direction: column; gap: 6px; }
+.tree { display: flex; flex-direction: column; max-block-size: 50vh; overflow: auto; padding: 2px; }
+.tree-row { display: flex; align-items: center; gap: 4px; min-block-size: 32px; padding-inline-end: 8px; border-radius: 6px; cursor: pointer; content-visibility: auto; contain-intrinsic-size: auto 32px; }
+.tree-row:hover { background: var(--hover); }
+.tree-row.is-on { background: var(--wash); }
+.tree-row.is-on .tree-label { font-weight: 600; }
+.tree-row.is-moving { box-shadow: inset 0 0 0 2px var(--accent); }
+.tree-row:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.tree-twist { display: inline-flex; inline-size: 18px; flex: none; color: var(--ink-2); }
+.tree-twist .ic { inline-size: 14px; block-size: 14px; transition: transform .2s var(--ease); }
+.tree-twist.is-shut .ic { transform: rotate(-90deg); }
+[dir="rtl"] .tree-twist.is-shut .ic { transform: rotate(90deg); }
+.tree-label { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tree-start .tree-label { color: var(--ink-2); font-style: italic; }
+.tree-actions { display: flex; flex-wrap: wrap; gap: 2px; padding-block-start: 6px; border-block-start: 1px solid var(--line); }
+
+/* Accessibility check: the count on its button, the problems by group, the focused one's advice. */
+.btn-count { position: relative; }
+.btn-count .count { position: absolute; inset-block-start: -4px; inset-inline-end: -6px; min-inline-size: 17px; block-size: 17px; padding: 0 4px; border-radius: 999px; background: var(--on); color: var(--on-ink); box-shadow: 0 0 0 2px var(--panel); font-size: 11px; font-weight: 700; line-height: 17px; text-align: center; font-variant-numeric: tabular-nums; pointer-events: none; }
+.ck { display: flex; flex-direction: column; gap: 6px; }
+.ck-sum { display: block; color: var(--ink); }
+.ck-list { display: flex; flex-direction: column; max-block-size: 44vh; overflow: auto; padding: 2px; }
+.ck-group + .ck-group { margin-block-start: 8px; }
+.ck-group-name { padding: 2px 8px 4px; font-size: 12px; font-weight: 700; color: var(--ink-2); }
+.ck-row { display: flex; align-items: flex-start; gap: 10px; padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.ck-row:hover { background: var(--hover); }
+.ck-row.is-on { background: var(--wash); }
+.ck-row:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+/* Shape, not colour alone: a filled dot to fix, a ring to look at. */
+.ck-mark { box-sizing: border-box; inline-size: 9px; block-size: 9px; margin-block-start: 6px; flex: none; border-radius: 50%; }
+.ck-mark.is-error { background: var(--accent-text); }
+.ck-mark.is-warning { border: 1.5px solid var(--ink-2); }
+.ck-text { display: grid; gap: 1px; min-inline-size: 0; }
+.ck-msg { font-weight: 600; overflow-wrap: anywhere; }
+.ck-part { overflow: hidden; font-size: 13px; color: var(--ink-2); text-overflow: ellipsis; white-space: nowrap; }
+.ck-detail { display: flex; flex-direction: column; gap: 8px; padding-block-start: 8px; border-block-start: 1px solid var(--line); }
+.ck-hint { margin: 0; max-inline-size: 60ch; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.ck-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.ck-none { display: flex; align-items: flex-start; gap: 10px; padding: 4px 2px; border-radius: 6px; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.ck-none:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.ck-none strong { color: var(--ink); }
+.ck-ok { display: inline-flex; align-items: center; justify-content: center; inline-size: 22px; block-size: 22px; flex: none; border-radius: 50%; background: var(--hover); color: var(--ink); }
+.ck-ok .ic { inline-size: 14px; block-size: 14px; }
+::highlight(pz-check) { background-color: rgba(255, 106, 43, .22); }
+::highlight(pz-check-current) { background-color: var(--accent); color: #121214; }
+
+/* Dialogs: keyboard help and source view */
+.dlg { inline-size: min(640px, calc(100vw - 32px)); max-block-size: calc(100vh - 48px); padding: 0; border: 0; border-radius: 12px; background: var(--page); color: var(--ink); box-shadow: 0 0 0 1px var(--line), var(--shadow); font: 14px/1.45 "Atkinson Hyperlegible Next", system-ui, sans-serif; }
+.dlg[open] { display: flex; flex-direction: column; animation: pz-pop .24s var(--ease); }
+.dlg::backdrop { background: rgba(9, 9, 11, .45); }
+.dlg-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 12px 8px 20px; padding-inline: 20px 12px; border-block-end: 1px solid var(--line); }
+.dlg-title { font: 400 22px/1.2 "Gloock", Georgia, serif; }
+.dlg-body { display: flex; flex-direction: column; gap: 8px; padding: 16px 20px 20px; overflow: auto; }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 6px; margin-block-end: 8px; }
+.keys h3 { margin: 8px 0 6px; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.keys dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; align-items: baseline; }
+.report-sum { margin: 0 0 4px; font-size: 15px; line-height: 1.5; max-inline-size: 60ch; }
+.report h3 { margin: 10px 0 4px; font-size: 13px; font-weight: 700; color: var(--ink-2); }
+.report ul { display: flex; flex-direction: column; gap: 6px; margin: 0; padding-inline-start: 20px; }
+.report li { max-inline-size: 64ch; padding-inline-start: 2px; }
+/* The marker repeats the group in shape: a filled dot for what was lost, a ring for what changed, a dash for the rest. */
+.report.is-lost li { list-style: disc; }
+.report.is-lost li::marker { color: var(--accent-text); }
+.report.is-changed li { list-style: circle; }
+.report.is-info li { list-style: "– "; color: var(--ink-2); }
+.keys kbd { padding: 1px 6px; border: 1px solid var(--line); border-block-end-width: 2px; border-radius: 5px; background: var(--panel); font: 12.5px/1.5 ui-monospace, monospace; white-space: nowrap; }
+
+/* Screen reader live regions and the paste bin: present, not visible. */
+.pz-live, .pz-paste-bin {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Code tokens in the canvas, painted without touching the field (the page gets spans, content.css). */
+::highlight(pz-tok-comment) { color: var(--c-tok-comment); }
+::highlight(pz-tok-string) { color: var(--c-tok-string); }
+::highlight(pz-tok-number) { color: var(--c-tok-number); }
+::highlight(pz-tok-keyword) { color: var(--c-tok-keyword); }
+::highlight(pz-tok-literal) { color: var(--c-tok-literal); }
+::highlight(pz-tok-tag) { color: var(--c-tok-tag); }
+::highlight(pz-tok-attr) { color: var(--c-tok-attr); }
+::highlight(pz-tok-property) { color: var(--c-tok-property); }
+::highlight(pz-tok-variable) { color: var(--c-tok-variable); }
+::highlight(pz-tok-function) { color: var(--c-tok-function); }
+::highlight(pz-tok-meta) { color: var(--c-tok-meta); }
+::highlight(pz-tok-comment) { font-style: italic; }
+/* The link or code the next typed character joins. */
+::highlight(pz-boundary) { background-color: var(--pz-boundary); }
+
+/* A locked part: the lock shows on the part being worked on, and its options say so in words. */
+.has-tools .pz-block.is-locked.is-current { outline: 1px dotted var(--edge); outline-offset: 2px; }
+.turns { display: flex; flex-wrap: wrap; gap: 4px; }
+.opt-locked { display: flex; align-items: center; gap: 6px; padding: 4px 6px; color: var(--ink); }
+.opt-locked .ic { inline-size: 16px; block-size: 16px; flex: none; }
+
+/* Utility parts in the canvas: a page break shows where the page ends; contents and HTML are framed. */
+.pz-canvas .pz-page-break-part { display: flex; align-items: center; gap: 10px; padding-block: 10px; cursor: default; color: var(--ink-2); font-size: 12px; font-weight: 600; }
+.pz-canvas .pz-page-break-part::before, .pz-canvas .pz-page-break-part::after { content: ""; flex: 1 1 auto; border-block-start: 1.5px dashed var(--edge); }
+.pz-canvas .pz-toc-part, .pz-canvas .pz-html-part { padding: 10px 12px; border-radius: 6px; box-shadow: inset 0 0 0 1px var(--line); cursor: default; }
+.pz-toc-title { display: block; margin-block-end: 4px; font-size: 13px; color: var(--ink-2); }
+.pz-toc-empty { margin: 0; color: var(--ink-2); font-size: 14px; }
+.pz-toc-entry { color: var(--accent-text); }
+.pz-html-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-block-end: 6px; font-size: 13px; color: var(--ink-2); }
+.pz-html-code { min-block-size: 120px; font: 13px/1.5 ui-monospace, monospace; resize: vertical; padding-block: 8px; block-size: auto; }
+.pz-html-preview { display: block; inline-size: 100%; min-block-size: 160px; border: 0; border-radius: 6px; background: #FFFFFF; }
+
+/* ------------------------------------------------------------------------
+   More tools: the find bar, the character picker, counts, the page as published. */
+.menu-sep { block-size: 1px; margin: 4px 6px; background: var(--line); }
+.findbar { position: sticky; inset-block-end: 35px; z-index: 3; display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; border-block-start: 1px solid var(--line); background: var(--page); font-size: 13px; animation: pz-msg .3s var(--ease); }
+.find-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.find-field { flex: 1 1 14em; min-inline-size: 0; }
+.find-row .field { block-size: 30px; }
+.find-row .search .ic { inset-block-start: 6px; }
+.find-count { min-inline-size: 7ch; color: var(--ink-2); font-variant-numeric: tabular-nums; text-align: end; }
+.find-opt { min-inline-size: 30px; justify-content: center; font-weight: 700; }
+.btn.find-opt.is-on { background: var(--on); color: var(--on-ink); }
+::highlight(pz-find) { background-color: rgba(255, 106, 43, .28); }
+::highlight(pz-find-current) { background-color: var(--accent); color: #121214; }
+/* Spaces and marks shown (TinyMCE visualchars): spaces tinted, non-breaking ones in accent, a pilcrow at each end of text. */
+::highlight(pz-space) { background-color: var(--hover); }
+::highlight(pz-nbsp) { background-color: rgba(255, 106, 43, .4); }
+.pz-canvas.is-invisibles .pz-richtext::after { content: "¶"; margin-inline-start: 1px; color: var(--ink-2); font-weight: 400; font-style: normal; pointer-events: none; }
+/* Outlines of parts (TinyMCE visualblocks): every part's box, nested ones inside. */
+.pz-canvas.is-outlines .pz-block { outline: 1px dashed var(--edge); outline-offset: -1px; }
+.pz-canvas.is-outlines .pz-block.is-selected { outline-style: solid; }
+.glyphs { display: flex; flex-direction: column; gap: 6px; max-block-size: 320px; overflow: auto; padding: 2px; }
+.glyph-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 4px; }
+.glyph { display: flex; align-items: center; justify-content: center; justify-self: stretch; box-sizing: border-box; inline-size: 100%; block-size: 40px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); font-size: 20px; line-height: 1; cursor: pointer; transition: background-color .15s; }
+.glyph:hover { background: var(--hover); }
+.glyph.is-active { box-shadow: inset 0 0 0 2px var(--accent); background: var(--wash); }
+.glyph-name { min-block-size: 1.45em; color: var(--ink); }
+.counts { border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.counts th, .counts td { padding: 6px 12px; padding-inline: 0 24px; border-block-end: 1px solid var(--line); text-align: start; }
+.counts td { text-align: end; }
+.counts thead th { font-size: 13px; color: var(--ink-2); text-align: end; }
+.counts tbody th { font-weight: 600; }
+.dlg.dlg-wide { inline-size: min(960px, calc(100vw - 32px)); }
+.page-host { border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); }
+.pz-page { padding: 24px 28px; color: var(--ink); background: var(--page); border-radius: 8px; }
+
+/* ------------------------------------------------------------------------
+   Narrow field (a phone, or a narrow column of the form): bigger targets, menus as wide as the field. */
+@container pz (max-width: 560px) {
+  .btn { block-size: 44px; }
+  .btn-icon { inline-size: 44px; }
+  .btn-s { block-size: 36px; padding: 0 9px; }
+  .btn-s.btn-icon { inline-size: 36px; }
+  .only-s { display: inline-flex; }
+  .plus { display: none; }
+  .pop-add { inline-size: calc(100cqw - 12px); }
+  .sw { inline-size: 30px; block-size: 30px; }
+  .drop { padding: 18px 12px; }
+  .pop-blk, .pop-pad, .pop-outline { inline-size: min(340px, calc(100cqw - 12px)); }
+  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .seg .btn { block-size: 38px; }
+  .field { block-size: 44px; }
+  .bubble .btn { block-size: 40px; }
+  .bubble .btn-icon { inline-size: 42px; }
+  .bubble .field { inline-size: 170px; block-size: 40px; }
+  .pz-canvas { padding: 12px 14px 18px 62px; padding-inline: 62px 14px; font-size: 16px; }
+  .appender, .starter { padding-inline: 58px 14px; }
+  .cfg { inline-size: 28px; block-size: 28px; margin-block-start: 2px; }
+  .tb { grid-template-columns: minmax(0, 1fr) 28px; }
+  .tadd-row { block-size: 32px; }
+  .cellbar .btn { block-size: 40px; }
+  .tadd, .pz-add-button { opacity: 1; }
+  .dropline { inset-inline: 52px 4px; }
+  /* The message gets its own line; the tools wrap rather than push the field wider. */
+  .status { flex-wrap: wrap; }
+  .status-l { flex-basis: 100%; padding-block: 4px; }
+  .status-r { flex: 1 1 auto; flex-wrap: wrap; justify-content: flex-end; }
+}
+
+/* Touch: 44px targets everywhere (more than the 24 WCAG 2.5.8 asks for). */
+@media (pointer: coarse) {
+  .btn, .btn-s { min-block-size: 44px; }
+  .btn-icon, .btn-s.btn-icon { min-inline-size: 44px; }
+  .cfg { inline-size: 32px; block-size: 32px; }
+  .tree-row, .ck-row { min-block-size: 44px; }
+}
+
+@media (forced-colors: active) {
+  .pz-block.is-selected, .has-tools > .pz-block.is-current { outline: 2px solid Highlight; outline-offset: 1px; }
+  .pz-block .pz-block.is-selected { outline: 2px solid Highlight; outline-offset: -2px; }
+  .stems span { background: Highlight; forced-color-adjust: none; }
+  .ed:focus-within { outline-color: Highlight; }
+  .pop, .bubble, .dlg, .status { border: 1px solid CanvasText; }
+  .tile.is-active, .tree-row.is-moving { outline: 2px solid Highlight; }
+  .btn.is-on, .seg .btn.is-on, .cfg.is-on { outline: 2px solid Highlight; outline-offset: -2px; }
+  .plus, .plus-chip { forced-color-adjust: none; background: ButtonText; color: ButtonFace; }
+  .dropline { background: Highlight; forced-color-adjust: none; }
+  .pz-meter > span { background: Highlight; forced-color-adjust: none; }
+  .pz-notice, .pz-embed-card, .pz-upload, .note { border: 1px solid CanvasText; }
+  .sw { forced-color-adjust: none; border: 1px solid CanvasText; }
+  .sw.is-on { outline-color: Highlight; }
+  ::highlight(pz-find) { background-color: Mark; color: MarkText; }
+  ::highlight(pz-find-current), ::highlight(pz-nbsp) { background-color: Highlight; color: HighlightText; }
+  .glyph.is-active, .btn.find-opt.is-on { outline: 2px solid Highlight; outline-offset: -2px; }
+  .findbar { border-block-start: 1px solid CanvasText; }
+  .link-results { border: 1px solid CanvasText; }
+  .cellbar, .tadd, .pz-add-button { border: 1px solid CanvasText; }
+  .pz-canvas .pz-table :is(th, td).pz-block.is-selected { outline: 2px solid Highlight; outline-offset: -2px; }
+  .pz-canvas .pz-columns:is(.is-current, .is-selected, :hover) > .pz-column { outline: 1px solid CanvasText; }
+  .link-opt.is-active { outline: 2px solid Highlight; }
+  ::highlight(pz-boundary) { background-color: Highlight; color: HighlightText; }
+  ::highlight(pz-check) { background-color: Mark; color: MarkText; }
+  ::highlight(pz-check-current) { background-color: Highlight; color: HighlightText; }
+  .ck-row.is-on { outline: 2px solid Highlight; outline-offset: -2px; }
+  .ck-mark, .btn-count .count { forced-color-adjust: none; }
+  .ck-mark.is-error { background: CanvasText; }
+  .ck-mark.is-warning { border-color: CanvasText; }
+  .btn-count .count { background: CanvasText; color: Canvas; box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Each element that moves, by name. A universal reset (.pz *) doubled the cost of Enter at 2,000 parts in
+     WebKit; ui-a11y.spec.ts checks that nothing here is left animating. */
+  .ed, .work, .pz-canvas, .btn, .btn-more .ic, .cfg, .legs, .plus, .plus::before, .plus::after, .plus-chip::before, .plus-chip::after,
+  .dropline, .tree-twist .ic, .tile, .pop, .stems span, .fmt-bubble, .msg, .dlg[open],
+  .drop, .pz-meter > span, .pz-img, .pz-notice, .pz-embed-play, .sw, .link-results,
+  .cellbar, .tadd, .pz-add-button, .pz-summary-mark .ic, .findbar, .glyph, .note { animation: none !important; transition: none !important; }
+}
