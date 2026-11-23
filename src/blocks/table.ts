@@ -22,6 +22,11 @@ export const TABLE_CELL = 'core/table-cell'
 /** Rows a table holds; more load as placeholders. With MAX_COLUMNS it bounds the grid every render builds. */
 export const MAX_ROWS = 2000
 
+/** Presentational attributes of a legacy table: a small number. */
+const SMALL = /^\d{1,3}$/
+/** Column widths of a legacy table's `<colgroup>`, space separated; `auto` for a column without one. */
+export const COL_WIDTHS = /^(?:auto|\d{1,5}(?:\.\d{1,3})?(?:px|%|em|rem|pt)?)(?: (?:auto|\d{1,5}(?:\.\d{1,3})?(?:px|%|em|rem|pt)?))*$/
+
 const num = (v: unknown, fallback = 1): number => (typeof v === 'number' && v > 0 ? v : fallback)
 
 /** The grid of a stored or validated table block. */
@@ -87,12 +92,26 @@ export const table = defineSchema({
     caption: { type: 'richtext' },
     /** How it fits a narrow column: scrolls sideways, or each row becomes a card. */
     mode: { type: 'enum', values: ['scroll', 'stack'] },
+    /** Legacy HTML (decision 0020): the table's `border`, `cellpadding` and `cellspacing`, and its column widths. */
+    border: { type: 'string', pattern: SMALL, maxLength: 3, sparse: true },
+    cellPadding: { type: 'string', pattern: SMALL, maxLength: 3, sparse: true },
+    cellSpacing: { type: 'string', pattern: SMALL, maxLength: 3, sparse: true },
+    colWidths: { type: 'string', pattern: COL_WIDTHS, maxLength: 1000, sparse: true },
   },
   children: { allowed: [TABLE_ROW], max: MAX_ROWS },
   supports: { anchor: true, language: true, bleed: true },
   render: (block, ctx) => {
     const caption = block.attrs.caption
     const stack = layout(block).stack
+    if (ctx.legacy && !stack) {
+      // The source's table as it was: its own attributes and styles, no scrolling region around it.
+      const a = block.attrs
+      const cols = a.colWidths === '' ? [] : a.colWidths.split(' ')
+      return h('table', ctx.wrapper({ border: a.border || null, cellpadding: a.cellPadding || null, cellspacing: a.cellSpacing || null }),
+        caption.text === '' ? null : h('caption', null, ctx.richText(caption)),
+        cols.length === 0 ? null : h('colgroup', null, cols.map((w) => h('col', w === 'auto' ? null : { style: `width: ${w}` }))),
+        h('tbody', null, ctx.children()))
+    }
     // A region named by its caption that takes the focus, so the keyboard can scroll it.
     return h('div', ctx.wrapper({ class: stack ? 'pz-table pz-table-stack' : 'pz-table', role: 'region', tabindex: 0, 'aria-label': caption.text || ctx.labels.table }),
       h('table', stack ? { role: 'table' } : null,
@@ -114,7 +133,7 @@ export const tableRow = defineSchema({
   },
   render: (_block, ctx) => {
     const t = tableOf(ctx, 1)
-    return h('tr', t && layout(t).stack ? { role: 'row' } : null, ctx.children())
+    return h('tr', ctx.wrapper(t && layout(t).stack ? { role: 'row' } : {}), ctx.children())
   },
 })
 

@@ -29,6 +29,12 @@ export interface ParseMatch {
 
 export interface ParseContext {
   readonly source: ImportSource
+  /** The host keeps legacy HTML (decision 0020): styles, classes and frames as its policy says. */
+  readonly legacy: boolean
+  /** In legacy HTML, a frame from `src` stays a frame: a site the policy lists, or an embed provider's player. */
+  frame(src: string): boolean
+  /** An element's own style and classes as the legacy policy keeps them; empty without one. */
+  kept(el: Element): { readonly style: string; readonly className: string }
   /**
    * Inline content as rich text: formats from elements and styles, block
    * boundaries inside as line breaks, whitespace collapsed as a browser shows
@@ -38,7 +44,8 @@ export interface ParseContext {
   /**
    * The shared supports read from the element and what it inherits from
    * unwrapped ancestors: `anchor`, `textAlign`, `lang`, `dir`, `align`,
-   * `size`, `color` and `bleed` (Proza's classes). Only those the block's schema has are kept.
+   * `size`, `color` and `bleed` (Proza's classes), and in legacy HTML `htmlStyle` and `htmlClass`.
+   * Only those the block's schema has are kept.
    */
   supports(el: Element): Record<string, unknown>
   /** An address through the protocol allow-list; `''` (and a report entry) when it fails. */

@@ -52,9 +52,42 @@ function picture(img: Element, ctx: ParseContext, extra: Readonly<Record<string,
     naturalHeight: w > 0 && h > 0 ? h : 0,
     srcset: img.getAttribute('srcset') ?? '',
     href: link ? ctx.url(link.getAttribute('href')) : '',
+    ...(ctx.legacy ? legacyPicture(img, ctx) : {}),
     ...extra,
   }
 }
+
+/** The `<img>`'s own style and classes, in legacy HTML. */
+function legacyPicture(img: Element, ctx: ParseContext): Record<string, string> {
+  const { style, className } = ctx.kept(img)
+  return { ...(style !== '' ? { imgStyle: style } : {}), ...(className !== '' ? { imgClass: className } : {}) }
+}
+
+/** A frame in legacy HTML as it was written, when it may stay a frame. */
+function legacyFrame(el: Element, ctx: ParseContext): Record<string, unknown> | null {
+  const src = (el.getAttribute('src') ?? '').trim()
+  if (!ctx.legacy || !ctx.frame(src)) return null
+  const size = (name: string): string => {
+    const v = (el.getAttribute(name) ?? '').trim()
+    return /^(?:[1-9]\d{0,4}|(?:100|[1-9]\d?)%)$/.test(v) ? v : /^[1-9]\d{0,4}px$/.test(v) ? v.slice(0, -2) : ''
+  }
+  const border = el.getAttribute('frameborder')?.trim() ?? ''
+  return {
+    ...ctx.supports(el),
+    src: ctx.url(src),
+    title: el.getAttribute('title') ?? '',
+    width: size('width'),
+    height: size('height'),
+    allow: el.getAttribute('allow') ?? '',
+    allowFullscreen: el.hasAttribute('allowfullscreen'),
+    frameBorder: border === '0' || border === '1' ? border : '',
+  }
+}
+
+export const frameParse: readonly ParseRule[] = [
+  // Before the embed rules: a frame the host keeps stays a frame, a provider's player included.
+  { selector: 'iframe', priority: 70, parse: (el, ctx) => { const attrs = legacyFrame(el, ctx); return attrs ? { attrs } : null } },
+]
 
 const onlyChild = (el: Element, tag: string): Element | null => {
   const kids = [...el.childNodes].filter((n) => n.nodeType === 1 || (n.textContent ?? '').trim() !== '')
@@ -280,4 +313,5 @@ export const mediaParse: Readonly<Record<string, readonly ParseRule[]>> = {
   'core/audio': audioParse,
   'core/embed': embedParse,
   'core/file': fileParse,
+  'core/frame': frameParse,
 }

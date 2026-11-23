@@ -4,6 +4,7 @@
  * (`font-weight: 700`), colours mapped to the palette (stage 6). Only formats
  * the registry knows come out; validation checks their attributes again.
  */
+import { type LegacyRules, cleanStyle, joinStyle, keepClasses } from '../model/legacy'
 import { type FormatRange, type FormatRegistry, type Mark, type RichTextValue, OBJECT_CHAR, attrsKey, normalize } from '../model/richtext'
 import { safeUrl } from '../model/url'
 import type { ImportSource, Reporter } from './report'
@@ -26,6 +27,8 @@ export interface ImportState {
   /** The language most of the text is in, lowercased; text in it needs no language span. */
   readonly lang: string
   readonly classes: Readonly<Record<string, ClassMapping>>
+  /** The host keeps legacy HTML (decision 0020); null otherwise. */
+  readonly legacy: LegacyRules | null
   /** Justified text is kept (the host offers it). */
   readonly justify?: boolean
   /** Characters by font size (px) of the block being read; null for unstyled text. */
@@ -56,6 +59,15 @@ export const BLOCK_TAGS = new Set([
   'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'li', 'main', 'menu', 'nav', 'ol', 'p', 'pre', 'section',
   'summary', 'table', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th', 'caption', 'ul', 'legend', 'picture', 'body',
 ])
+
+/** Properties the reader turns into formats (bold, italic, underline, sub- and superscript) or whitespace, never into a kept style. */
+const FORMAT_PROPS = new Set(['font-weight', 'font-style', 'text-decoration', 'text-decoration-line', 'vertical-align', 'white-space', 'font'])
+
+/** Properties text inherits from its box, which a span may carry for an unwrapped box. */
+const INHERITED = new Set(['color', 'font-size', 'font-family', 'font-variant', 'letter-spacing', 'word-spacing', 'text-transform', 'line-height', 'direction'])
+
+/** `<font size>` as the CSS keywords it stands for. */
+const FONT_SIZES = ['x-small', 'small', 'medium', 'large', 'x-large', 'xx-large', 'xxx-large']
 
 /** Office namespaces (`o:p`, `v:shape`, `w:sdt`) carry no text of their own worth keeping, except through their children. */
 const OFFICE = /^(?:o|v|w|m|st1):/
@@ -125,7 +137,9 @@ export class InlineReader {
     if ((c.trim() !== '' || c === '\u00a0') && !inh.marks.has('subscript') && !inh.marks.has('superscript')) this.#st.sizes.set(inh.px, (this.#st.sizes.get(inh.px) ?? 0) + 1)
   }
 
-  #text(data: string, inh: Inherit): void {
+  #text(raw: string, inh: Inherit): void {
+    // U+FFFC stands for an inline object in a value; in a source's text it is a stray character that nothing would back.
+    const data = raw.includes(OBJECT_CHAR) ? raw.replaceAll(OBJECT_CHAR, '') : raw
     // By UTF-16 unit, as format offsets count: an emoji is two.
     if (inh.pre || this.#st.exact) {
       const raw = data.replace(/\r\n?/g, '\n')
@@ -171,10 +185,12 @@ export class InlineReader {
         if (el.classList.contains('Apple-interchange-newline')) return
         this.#break(inh)
         return
-      case 'wbr': return
+      case 'wbr': if (this.#st.legacy && this.#st.formats.has('wbr')) this.#object({ type: 'wbr' }, inh); return
       case TAB_TAG: this.#push('\t', inh); return
       case 'input': return
       case 'img': this.#image(el, inh); return
+      case 'a': if (this.#anchor(el, inh)) return; break
+      case 'i': case 'span': if (this.#icon(el, inh)) return; break
       case NOTE_TAG: {
         const note = el.getAttribute('note') ?? ''
         if (note.trim() !== '' && this.#st.formats.has('footnote')) this.#object({ type: 'footnote', attrs: { note } }, inh)
@@ -197,7 +213,44 @@ export class InlineReader {
       const v = el.getAttribute(k)
       if (v && /^[1-9]\d{0,4}$/.test(v.trim())) attrs[k] = v.trim()
     }
+    const lg = this.#st.legacy
+    if (lg) {
+      const style = cleanStyle(el.getAttribute('style'), lg.style)
+      const cls = this.#hostClasses(el)
+      const title = el.getAttribute('title')
+      if (style !== '') attrs.style = style
+      if (cls !== '') attrs.class = cls
+      if (title) attrs.title = title
+    }
     this.#object({ type: 'image', attrs }, inh)
+  }
+
+  /** Legacy HTML: a link without an address that names a place (`<a name="top">`) is an anchor; its content follows. */
+  #anchor(el: Element, inh: Inherit): boolean {
+    if (!this.#st.legacy || !this.#st.formats.has('anchor') || (el.getAttribute('href') ?? '').trim() !== '') return false
+    const name = el.getAttribute('name') ?? el.getAttribute('id') ?? ''
+    if (!/^[A-Za-z][\w:.-]{0,99}$/.test(name)) return false
+    this.#object({ type: 'anchor', attrs: { name } }, inh)
+    const next = this.styled(el, inh)
+    for (const c of el.childNodes) this.#node(c, next)
+    return true
+  }
+
+  /** Legacy HTML: an empty element with the host's classes is an icon (`<i class="fa fa-file"></i>`). */
+  #icon(el: Element, inh: Inherit): boolean {
+    if (!this.#st.legacy || el.childNodes.length > 0) return false
+    const type = el.localName === 'i' ? 'icon' : 'marker'
+    const cls = this.#hostClasses(el)
+    if (cls === '' || !this.#st.formats.has(type)) return false
+    this.#object({ type, attrs: { class: cls } }, inh)
+    return true
+  }
+
+  /** The element's classes the legacy policy keeps, without those the host maps to a format or block. */
+  #hostClasses(el: Element): string {
+    const lg = this.#st.legacy
+    if (!lg) return ''
+    return keepClasses([...el.classList].filter((c) => this.#st.classes[c] === undefined).join(' '), lg.className)
   }
 
   #mapped(el: Element): ClassMapping | undefined {
@@ -208,14 +261,27 @@ export class InlineReader {
     return undefined
   }
 
-  /** What `el` gives its content: formats from its tag, attributes, classes and styles; size; whitespace; language. */
-  styled(el: Element, inh: Inherit): Inherit {
+  /**
+   * What `el` gives its content: formats from its tag, attributes, classes and styles; size; whitespace; language.
+   * `own`: the element is a part that keeps its legacy style itself, so its kept properties do not pass to the text.
+   */
+  styled(el: Element, inh: Inherit, own = false): Inherit {
     const tag = el.localName
     const st = this.#st
+    const lg = st.legacy
     const marks = new Map(inh.marks)
     const add = (type: string, attrs?: Readonly<Record<string, string>>): void => {
       if (!st.formats.has(type)) return
       marks.set(type, attrs && Object.keys(attrs).length > 0 ? { type, attrs } : { type })
+    }
+    // Legacy HTML: styles and classes of inline elements collect on one span format, inner ones winning.
+    const spanStyle = new Map<string, string>()
+    const spanClasses: string[] = []
+    const keepStyle = (prop: string, value: string): boolean => {
+      // A box's own look (its border, its background) is not its text's: only what text inherits passes from a box to a span.
+      if (!lg || own || !lg.style(prop) || (BLOCK_TAGS.has(tag) && !INHERITED.has(prop))) return false
+      spanStyle.set(prop, value)
+      return true
     }
     switch (tag) {
       case 'b': case 'strong': add('bold'); break
@@ -241,14 +307,24 @@ export class InlineReader {
         if (href === null || href.trim() === '') break
         const safe = safeUrl(href)
         if (safe === null) { st.report.add('link', href.slice(0, 40)); break }
-        add('link', el.getAttribute('target') === '_blank' ? { href: safe, target: '_blank' } : { href: safe })
+        const attrs: Record<string, string> = el.getAttribute('target') === '_blank' ? { href: safe, target: '_blank' } : { href: safe }
+        if (lg) {
+          const title = el.getAttribute('title')
+          const cls = this.#hostClasses(el)
+          if (title) attrs.title = title
+          if (cls !== '') attrs.class = cls
+        }
+        add('link', attrs)
         break
       }
       case 'font': {
         const color = el.getAttribute('color')
-        if (color) this.#color(color, marks)
+        if (color && !keepStyle('color', color)) this.#color(color, marks)
         const face = el.getAttribute('face')
-        if (face) this.#family(face, marks)
+        if (face && !keepStyle('font-family', face)) this.#family(face, marks)
+        const size = el.getAttribute('size')?.trim() ?? ''
+        const n = /^[1-7]$/.test(size) ? Number(size) : /^[+-][1-7]$/.test(size) ? Math.max(1, Math.min(7, 3 + Number(size))) : 0
+        if (n > 0) keepStyle('font-size', FONT_SIZES[n - 1]!)
         break
       }
       case 'span': {
@@ -261,6 +337,10 @@ export class InlineReader {
       if (c.startsWith('pz-color-') && tag === 'span') add('color', { color: c.slice('pz-color-'.length) })
       const m = st.classes[c]
       if (m && m !== 'drop' && 'format' in m) add(m.format, m.attrs)
+    }
+    if (lg && !own && tag !== 'a' && !BLOCK_TAGS.has(tag)) {
+      const cls = this.#hostClasses(el)
+      if (cls !== '') spanClasses.push(cls)
     }
     const lang = el.getAttribute('lang')?.trim().toLowerCase() ?? ''
     let inLang = inh.lang
@@ -282,6 +362,13 @@ export class InlineReader {
     }
     const style = parseStyle(el.getAttribute('style'))
     for (const [prop, value] of style) {
+      // A part keeps its own declarations; whitespace still shapes how its text reads.
+      if (own && lg?.style(prop) && prop !== 'white-space') continue
+      if (lg && !FORMAT_PROPS.has(prop)) {
+        // Legacy HTML: a declaration is kept as it is or not at all, never mapped to a palette or a preset.
+        if (!keepStyle(prop, value) && !own && !lg.style(prop) && !BLOCK_TAGS.has(tag)) st.report.add('style', prop)
+        continue
+      }
       switch (prop) {
         case 'font-weight': {
           const b = boldness(value)
@@ -323,7 +410,24 @@ export class InlineReader {
         case 'font-variant': if (/small-caps/i.test(value)) st.report.add('style', 'font-variant: small-caps'); break
       }
     }
+    if (spanStyle.size > 0 || spanClasses.length > 0) this.#span(marks, spanStyle, spanClasses)
     return { marks, px, pre, lang: inLang, base: inh.base }
+  }
+
+  /** The inherited legacy span joined with this element's styles and classes. */
+  #span(marks: Map<string, Mark>, style: ReadonlyMap<string, string>, classes: readonly string[]): void {
+    const lg = this.#st.legacy
+    if (!lg || !this.#st.formats.has('span')) return
+    const before = marks.get('span')?.attrs
+    const decls = new Map(parseStyle(before?.style ?? null))
+    for (const [k, v] of style) { decls.delete(k); decls.set(k, v) }
+    const css = cleanStyle(joinStyle(decls), lg.style)
+    const cls = [...new Set([...(before?.class ?? '').split(' '), ...classes.flatMap((c) => c.split(' '))].filter((c) => c !== ''))].join(' ')
+    const attrs: Record<string, string> = {}
+    if (css !== '') attrs.style = css
+    if (cls !== '') attrs.class = cls
+    if (Object.keys(attrs).length > 0) marks.set('span', { type: 'span', attrs })
+    else marks.delete('span')
   }
 
   #color(value: string, marks: Map<string, Mark>): void {

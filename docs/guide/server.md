@@ -52,6 +52,8 @@ When the server must accept HTML (a PHP host, a form that posts `getHTML()`), sa
 - on links, `target` only as `_blank` (any other is removed), `rel` without `opener`, and `rel="noopener"` added with `target="_blank"` (`linkTarget` and `newWindowRel` in the policy);
 - no `style` attribute anywhere, and no event handlers.
 
+A host that keeps legacy HTML passes its policy: `sanitizeElement(tag, attrs, { legacy })` and `sanitizerPolicy({ legacy })` add `style` (the policy's properties, values without `url(`, `expression(` and the like), the host's classes, `<colgroup>`, `<col>`, `<i>`, table `border`, `cellpadding` and `cellspacing`, `a[name]`, and frames from the listed sites with their sandbox. Render with the same policy: `render(doc, registry, { formats: legacyFormats(), legacy })`.
+
 In JavaScript, call `sanitizeElement(tag, attrs)` from your sanitiser's element hook. It returns the attributes that may stay, or `null` when the element must go:
 
 ```ts
@@ -69,7 +71,7 @@ The raw HTML part is off by default. With `rawHtml: true` the author writes mark
 
 ## The published page's Content Security Policy
 
-Rendered output has no inline style and no script. A page can serve it with `style-src 'self'` and `script-src 'self'`. Embeds need their providers in `frame-src`.
+Rendered output has no inline style and no script. A page can serve it with `style-src 'self'` and `script-src 'self'`. Embeds need their providers in `frame-src`. Output with a legacy policy has inline styles: such a page needs `style-src-attr 'unsafe-inline'`, and the listed sites in `frame-src`.
 
 ## Known limits
 

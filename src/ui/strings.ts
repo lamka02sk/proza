@@ -406,6 +406,12 @@ export interface UiStrings {
   readonly rawHtmlPreviewTitle: string
   readonly rawHtmlSaved: string
   readonly rawHtmlOff: string
+  readonly frameAddress: string
+  readonly frameTitle: string
+  readonly frameSaved: string
+  /** Which sites a frame may come from: `sites` is a list in words. */
+  frameSites(sites: string): string
+  readonly frameNotAllowed: string
   // Styles and locks
   readonly style: string
   readonly styleDefault: string

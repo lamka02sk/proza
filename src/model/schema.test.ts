@@ -214,8 +214,8 @@ describe('validateDoc', () => {
     const saved = serializeDoc(doc, registry)
     expect(saved.blocks[0]).toBe(original)
     // The common attributes are stored only when set.
-    const { lock, variant, ...stored } = defaultAttrs(para)
-    expect([lock, variant]).toEqual(['', ''])
+    const { lock, variant, htmlStyle, htmlClass, ...stored } = defaultAttrs(para)
+    expect([lock, variant, htmlStyle, htmlClass]).toEqual(['', '', '', ''])
     expect(saved.blocks[1]).toEqual({ id: 'p', type: 't/para', attrs: stored })
   })
 
@@ -247,7 +247,7 @@ describe('migrations', () => {
   it.each(fixtures)('%s loads as the current version', (_name, stored) => {
     const { doc, issues } = v({ version: 1, blocks: [stored] })
     expect(issues).toEqual([])
-    expect(doc.blocks[0]).toEqual({ id: 'a', type: 't/old', attrs: { heading: 'big', size: 'm', lock: '', variant: '' } })
+    expect(doc.blocks[0]).toEqual({ id: 'a', type: 't/old', attrs: { heading: 'big', size: 'm', lock: '', variant: '', htmlStyle: '', htmlClass: '' } })
     expect(serializeDoc(doc, registry).blocks[0]).toEqual({ id: 'a', type: 't/old', version: 3, attrs: { heading: 'big', size: 'm' } })
   })
 

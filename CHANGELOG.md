@@ -2,6 +2,23 @@
 
 Proza follows [semantic versioning](https://semver.org). The public API is what [`docs/api/report.md`](docs/api/report.md) lists. Stored documents carry their own version and always load in later releases.
 
+## 0.1.2 (2026-11-23)
+
+### Legacy HTML
+
+- `legacy` option (`createEditor`, `importHtml`, `render`): a site that stores HTML other editors and its pages read keeps it as written. HTML content keeps inline styles (colours, sizes, fonts, backgrounds, alignment, boxes), the site's classes, boxes with them (`<div class="note">`, `<section>`), named anchors, icon elements, link titles and classes, empty lines, table borders and column widths, and frames of the sites the policy lists, each with its own sandbox. Output is plain HTML without Proza's classes where an inline style says the same. Pasted content is still converted to clean parts.
+- With `rawHtml` on, what no part can hold (a form, an SVG) stays as raw HTML.
+- The Embedded page part (`core/frame`) for those frames, with its address and title on the part, a preview on request and a checker rule for a missing title.
+- `htmlLosses(before, after)`: what an HTML round trip lost, for checking stored records before switching.
+- `sanitizeElement` and `sanitizerPolicy` take the same policy; `legacyFormats()`, `LEGACY_STYLES`, `FRAME_SANDBOX` and `cleanStyle` are exported.
+- Without the option nothing changes. Stored JSON gains attributes only where legacy markup sets them.
+
+### Fixes
+
+- A named anchor (`<a name>`) inside text is no longer lost by its own link hole.
+- A stray U+FFFC in imported text no longer leaves an empty paragraph or a trailing space.
+- A language span around a block in the same language no longer repeats inside it.
+
 ## 0.1.1 (2026-11-22)
 
 ### Languages

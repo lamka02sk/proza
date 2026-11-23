@@ -1,6 +1,6 @@
 {
   "name": "@lamka02sk/proza",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Block-based WYSIWYG editor, written from scratch.",
   "keywords": [
     "editor",

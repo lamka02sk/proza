@@ -8,6 +8,7 @@
  * (WCAG 1.3.2). Each column is a size container of its own, so what is inside
  * responds to the column, not the window (content.css).
  */
+import type { RichTextValue } from '../model/richtext'
 import { EMPTY_HTML, h } from '../render/html'
 import { defineSchema } from './define'
 
@@ -60,12 +61,25 @@ export const group = defineSchema({
   attrs: {
     /** Plain, a tinted panel, or a ruled box. */
     look: { type: 'enum', values: ['', 'panel', 'line'] },
-    /** `section` and `aside` give the group a meaning for assistive technology; `div` gives none. */
-    tag: { type: 'enum', values: ['div', 'section', 'aside'] },
+    /** `section`, `article` and `aside` give the group a meaning for assistive technology; `div` gives none. */
+    tag: { type: 'enum', values: ['div', 'section', 'aside', 'article'] },
+    /**
+     * Legacy HTML (decision 0020): the text sat directly in the element, without a paragraph
+     * (`<div class="note">Text</div>`), and renders so again while the group holds one plain paragraph.
+     */
+    bare: { type: 'boolean', sparse: true },
   },
   children: {},
   supports: { anchor: true, language: true, bleed: true },
-  render: (b, ctx) => h(b.attrs.tag, ctx.wrapper({ class: b.attrs.look === '' ? 'pz-group' : `pz-group pz-look-${b.attrs.look}` }), ctx.children()),
+  render: (b, ctx) => {
+    const common: Readonly<Record<string, unknown>> = b.attrs
+    const own = (typeof common.htmlClass === 'string' && common.htmlClass !== '') || (typeof common.htmlStyle === 'string' && common.htmlStyle !== '')
+    // A legacy group with the host's class or style is the host's element; it reads back by them, without Proza's.
+    const cls = ctx.legacy && own ? null : b.attrs.look === '' ? 'pz-group' : `pz-group pz-look-${b.attrs.look}`
+    const only = b.children?.length === 1 ? b.children[0] : undefined
+    const plain = ctx.legacy && b.attrs.bare && only?.type === 'core/paragraph' && Object.entries(only.attrs).every(([key, value]) => key === 'content' || value === '')
+    return h(b.attrs.tag, ctx.wrapper({ class: cls }), plain ? ctx.richText(only.attrs.content as RichTextValue) : ctx.children())
+  },
 })
 
 export const details = defineSchema({

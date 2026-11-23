@@ -224,6 +224,7 @@ interface CreateEditorOptions {
     readonly draft?: boolean | string | AutosaveOptions;
     readonly output?: Output;
     readonly rawHtml?: boolean | ((html: string) => string | null);
+    readonly legacy?: LegacyPolicy | true;
     readonly height?: string;
     readonly a11y?: {
         readonly onSave?: 'warn' | 'block';
@@ -249,7 +250,7 @@ class Editor implements CommandHost {
     getHTML(): string;
     setContent(content: unknown): readonly ValidationIssue[];
     replaceContent(json: unknown, announce?: string): readonly ValidationIssue[];
-    importHtml(html: string, options?: Pick<ImportOptions, 'source' | 'rtf' | 'notes'>): ImportResult;
+    importHtml(html: string, options?: Pick<ImportOptions, 'source' | 'rtf' | 'notes' | 'legacy'>): ImportResult;
     importText(text: string): ImportResult;
     replaceHtml(html: string, announce?: string): ImportResult;
     importDocx(file: Blob): Promise<ImportResult>;
@@ -334,6 +335,7 @@ interface EditorOptions {
     readonly checks?: readonly DocumentRule[];
     readonly contentLanguage?: string;
     readonly onSave?: 'warn' | 'block';
+    readonly legacy?: LegacyPolicy | true;
 }
 type EditorSelection = {
     readonly kind: 'none';
@@ -363,6 +365,7 @@ interface EmbedProvider {
     readonly src: RegExp;
     page(player: string): string;
 }
+const FRAME_SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation";
 interface FieldSpec {
     readonly attr: string;
     readonly after?: boolean;
@@ -401,6 +404,15 @@ type FormatAttrRule = {
     readonly kind: 'enum';
     readonly values: readonly string[];
     readonly required?: boolean;
+} | {
+    readonly kind: 'style';
+    readonly required?: boolean;
+} | {
+    readonly kind: 'classes';
+    readonly required?: boolean;
+} | {
+    readonly kind: 'name';
+    readonly required?: boolean;
 };
 interface FormatSpec {
     readonly type: string;
@@ -431,6 +443,11 @@ interface FoundDraft {
 }
 interface Html {
     readonly html: string;
+}
+interface HtmlLoss {
+    readonly kind: 'text' | 'element' | 'attribute' | 'style' | 'class';
+    readonly detail: string;
+    readonly count: number;
 }
 interface ImportEvent {
     readonly origin: ImportOrigin;
@@ -464,6 +481,20 @@ interface KeyBinding {
     readonly keys: string;
     readonly mac?: boolean;
 }
+const LEGACY_STYLES: readonly string[];
+interface LegacyFrame {
+    readonly host: string;
+    readonly sandbox?: string | false;
+}
+interface LegacyPolicy {
+    readonly styles?: readonly string[];
+    readonly classes?: readonly string[];
+    readonly frames?: readonly (string | LegacyFrame)[];
+    readonly palette?: readonly {
+        readonly name: string;
+        readonly color: string;
+    }[];
+}
 type LinkSearch = (query: string, options: {
     readonly signal: AbortSignal;
 }) => Promise<readonly LinkSuggestion[]>;
@@ -495,6 +526,12 @@ interface OrderChange {
 type Output = 'json' | 'html' | 'both';
 interface ParseContext {
     readonly source: ImportSource;
+    readonly legacy: boolean;
+    frame(src: string): boolean;
+    kept(el: Element): {
+        readonly style: string;
+        readonly className: string;
+    };
     richText(nodes: Node | Iterable<Node>, options?: {
         readonly preformatted?: boolean;
     }): RichTextValue;
@@ -563,6 +600,9 @@ interface RenderContext {
     code(text: string, language: string): Html;
     rawHtml(html: string): Html;
     outline(): readonly OutlineEntry[];
+    readonly legacy: boolean;
+    frame(src: string): string | null | undefined;
+    legacyAttrs(style: string, className: string): HtmlAttrs;
 }
 interface RenderableBlock<A extends AttrSpecs = AttrSpecs> extends BlockSchema {
     readonly attrs: A;
@@ -1053,6 +1093,11 @@ interface UiStrings {
     readonly rawHtmlPreviewTitle: string;
     readonly rawHtmlSaved: string;
     readonly rawHtmlOff: string;
+    readonly frameAddress: string;
+    readonly frameTitle: string;
+    readonly frameSaved: string;
+    frameSites(sites: string): string;
+    readonly frameNotAllowed: string;
     readonly style: string;
     readonly styleDefault: string;
     readonly styleSet: (name: string) => string;
@@ -1105,6 +1150,7 @@ interface WrapperProps {
     readonly 'aria-label'?: string;
     readonly 'aria-describedby'?: string;
     readonly contenteditable?: 'false';
+    readonly style?: Readonly<Record<string, string>>;
 }
 const coreBlocks: readonly BlockDefinition[];
 const coreRegistry: RenderRegistry;
@@ -1118,10 +1164,12 @@ function formEntries(editor: Editor, name: string, output: Output): [
 ][];
 function guardSubmit(form: HTMLFormElement | null, editor: Editor, alreadyChecked?: () => boolean): () => void;
 function h(tag: string, attrs?: HtmlAttrs | null, ...children: Child[]): Html;
+function htmlLosses(before: string, after: string): HtmlLoss[];
 function importHtml(html: string, blocks: readonly ImportBlock[] | ReadonlyMap<string, ImportBlock>, options?: ImportOptions): ImportResult;
 function importText(text: string, blocks: readonly ImportBlock[] | ReadonlyMap<string, ImportBlock>, options?: ImportOptions): ImportResult;
 function isAddress(text: string): boolean;
 function isVague(text: string): boolean;
+function legacyFormats(base?: FormatRegistry): FormatRegistry;
 function linkName(value: RichTextValue, start: number, end: number): string;
 const locales: Readonly<Record<string, Locale>>;
 function looksLikeFileName(alt: string, src?: string): boolean;
@@ -1141,6 +1189,7 @@ type AttrSpec = {
     readonly default?: string;
     readonly pattern?: RegExp;
     readonly maxLength?: number;
+    readonly sparse?: boolean;
 } | {
     readonly type: 'number';
     readonly default?: number;
@@ -1150,6 +1199,7 @@ type AttrSpec = {
 } | {
     readonly type: 'boolean';
     readonly default?: boolean;
+    readonly sparse?: boolean;
 } | {
     readonly type: 'enum';
     readonly values: readonly (string | number)[];
@@ -1203,6 +1253,7 @@ interface EmbedProvider {
     readonly src: RegExp;
     page(player: string): string;
 }
+const FRAME_SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation";
 interface FormatRange {
     readonly type: string;
     readonly start: number;
@@ -1225,6 +1276,35 @@ interface Html {
     readonly html: string;
 }
 type HtmlAttrs = Readonly<Record<string, AttrValue>>;
+const LEGACY_STYLES: readonly string[];
+interface LegacyFrame {
+    readonly host: string;
+    readonly sandbox?: string | false;
+}
+interface LegacyPolicy {
+    readonly styles?: readonly string[];
+    readonly classes?: readonly string[];
+    readonly frames?: readonly (string | LegacyFrame)[];
+    readonly palette?: readonly {
+        readonly name: string;
+        readonly color: string;
+    }[];
+}
+interface LegacySanitizerPolicy {
+    readonly elements: Readonly<Record<string, readonly string[]>>;
+    readonly attributes: Readonly<Record<string, readonly string[]>>;
+    readonly style: {
+        readonly properties: readonly string[];
+        readonly forbiddenValue: string;
+        readonly forbiddenCharacters: string;
+    };
+    readonly classes: readonly string[];
+    readonly classToken: string;
+    readonly frames: readonly {
+        readonly host: string;
+        readonly sandbox: string | null;
+    }[];
+}
 const MAX_DEPTH = 128;
 const MAX_FORMATS = 10000;
 const MAX_URL = 8192;
@@ -1243,6 +1323,9 @@ interface RenderContext {
     code(text: string, language: string): Html;
     rawHtml(html: string): Html;
     outline(): readonly OutlineEntry[];
+    readonly legacy: boolean;
+    frame(src: string): string | null | undefined;
+    legacyAttrs(style: string, className: string): HtmlAttrs;
 }
 class RenderError extends Error {
     name: string;
@@ -1264,6 +1347,7 @@ interface RenderOptions {
     readonly measure?: Partial<Measure>;
     readonly highlight?: (code: string, language: string) => readonly Token[];
     readonly rawHtml?: (html: string) => string | null;
+    readonly legacy?: LegacyPolicy | true;
 }
 type RenderRegistry = ReadonlyMap<string, RenderableBlock>;
 interface RenderableBlock<A extends AttrSpecs = AttrSpecs> extends BlockSchema {
@@ -1279,6 +1363,9 @@ interface RenderableBlock<A extends AttrSpecs = AttrSpecs> extends BlockSchema {
 interface RichTextValue {
     readonly text: string;
     readonly formats: readonly FormatRange[];
+}
+interface SanitizeOptions {
+    readonly legacy?: LegacyPolicy | true;
 }
 interface SanitizerPolicy {
     readonly elements: Readonly<Record<string, readonly string[]>>;
@@ -1301,6 +1388,7 @@ interface SanitizerPolicy {
     };
     readonly newWindowRel: string;
     readonly linkTarget: string;
+    readonly legacy?: LegacySanitizerPolicy;
 }
 type SchemaRegistry = ReadonlyMap<string, BlockSchema>;
 interface Share {
@@ -1342,6 +1430,7 @@ interface ValidationIssue {
     readonly message: string;
 }
 function blockRegistry<T extends BlockSchema>(schemas: readonly T[]): ReadonlyMap<string, T>;
+function cleanStyle(text: string | null | undefined, allow?: (prop: string) => boolean): string;
 const coreRegistry: RenderRegistry;
 const coreSchemas: readonly RenderableBlock[];
 function cx(...parts: (string | false | null | undefined)[]): string | null;
@@ -1351,14 +1440,15 @@ function embedProviders(): readonly EmbedProvider[];
 function fragment(...children: Child[]): Html;
 function h(tag: string, attrs?: HtmlAttrs | null, ...children: Child[]): Html;
 function isPlayerUrl(src: string, providers?: readonly EmbedProvider[]): boolean;
+function legacyFormats(base?: FormatRegistry): FormatRegistry;
 function registerEmbedProvider(provider: EmbedProvider): void;
 function render(input: unknown, registry: RenderRegistry, options?: RenderOptions & ValidateOptions): string;
 function renderBlocks(blocks: readonly Block[], registry: RenderRegistry, options?: RenderOptions): string;
 function renderLabels(lang: string): RenderLabels;
 function safeSrcset(srcset: string): string | null;
 function safeUrl(url: string): string | null;
-function sanitizeElement(tag: string, attrs: Readonly<Record<string, string>>): Record<string, string> | null;
-function sanitizerPolicy(): SanitizerPolicy;
+function sanitizeElement(tag: string, attrs: Readonly<Record<string, string>>, options?: SanitizeOptions): Record<string, string> | null;
+function sanitizerPolicy(options?: SanitizeOptions): SanitizerPolicy;
 function serializeDoc(doc: Doc, registry: SchemaRegistry): StoredDoc;
 function slug(text: string): string;
 function tokenize(code: string, language: string): Token[];
@@ -1477,7 +1567,7 @@ class Editor implements CommandHost {
     getHTML(): string;
     setContent(content: unknown): readonly ValidationIssue[];
     replaceContent(json: unknown, announce?: string): readonly ValidationIssue[];
-    importHtml(html: string, options?: Pick<ImportOptions, 'source' | 'rtf' | 'notes'>): ImportResult;
+    importHtml(html: string, options?: Pick<ImportOptions, 'source' | 'rtf' | 'notes' | 'legacy'>): ImportResult;
     importText(text: string): ImportResult;
     replaceHtml(html: string, announce?: string): ImportResult;
     importDocx(file: Blob): Promise<ImportResult>;
@@ -1916,6 +2006,16 @@ interface ProzaPlugin {
 }
 // index.d.ts
 type Output = 'json' | 'html' | 'both';
+// model/legacy.d.ts
+interface LegacyPolicy {
+    readonly styles?: readonly string[];
+    readonly classes?: readonly string[];
+    readonly frames?: readonly (string | LegacyFrame)[];
+    readonly palette?: readonly {
+        readonly name: string;
+        readonly color: string;
+    }[];
+}
 // index.d.ts
 interface EditorHooks {
     readonly blocksChange?: EditorEvents['blocksChange'];
@@ -1951,6 +2051,7 @@ interface EditorOptions {
     readonly checks?: readonly DocumentRule[];
     readonly contentLanguage?: string;
     readonly onSave?: 'warn' | 'block';
+    readonly legacy?: LegacyPolicy | true;
 }
 // model/schema.d.ts
 interface StoredDoc extends Doc {
@@ -1971,6 +2072,7 @@ interface ImportOptions {
     readonly rtf?: string;
     readonly notes?: readonly ReportNote[];
     readonly justify?: boolean;
+    readonly legacy?: LegacyPolicy | true;
 }
 // import/pipeline.d.ts
 interface ImportResult {
@@ -2527,6 +2629,11 @@ interface UiStrings {
     readonly rawHtmlPreviewTitle: string;
     readonly rawHtmlSaved: string;
     readonly rawHtmlOff: string;
+    readonly frameAddress: string;
+    readonly frameTitle: string;
+    readonly frameSaved: string;
+    frameSites(sites: string): string;
+    readonly frameNotAllowed: string;
     readonly style: string;
     readonly styleDefault: string;
     readonly styleSet: (name: string) => string;

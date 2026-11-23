@@ -9,7 +9,7 @@
  * captions or transcript, an embed without a title.
  */
 import { checksFor } from './checks'
-import { type Component, type PropType, type VNode, computed, defineComponent, h, nextTick, onMounted, ref } from 'vue'
+import { type Component, type PropType, type VNode, computed, defineComponent, h, nextTick, onMounted, ref, watch } from 'vue'
 import type { BlockDefinition, BlockEditing, InserterItem } from '../editor/editing'
 import { caret } from '../editor/selection'
 import { excerpt } from '../editor/strings'
@@ -28,7 +28,9 @@ import { audioPatch, filePatch, imagePatch, videoPatch } from './media-patch'
 import { galleryTransforms, imageTransforms } from './transforms'
 import { defineBlock } from './define'
 import { mediaParse } from './media-parse'
-import { AUDIO, EMBED, FILE, GALLERY, IMAGE, VIDEO, audio, decodeName, embed, file, fileType, gallery, image, video } from './media'
+import { AUDIO, EMBED, FILE, FRAME, GALLERY, IMAGE, VIDEO, audio, decodeName, embed, file, fileType, frame, gallery, image, video } from './media'
+import { httpsHost } from '../model/legacy'
+import { EMBED_FRAME } from '../render/sanitize'
 import { AudioInspector, EmbedInspector, FileInspector, GalleryInspector, ImageInspector, VideoInspector } from './media-inspector'
 
 const props = {
@@ -539,6 +541,88 @@ const fileEditing: BlockEditing = {
   inserter: [mediaItem(FILE, { ink: ['M30 4h24l12 12v28H30z', 'M54 4v12h12'], accent: ['M38 30h20M38 37h14'] }, ['download', 'pdf', 'attachment', 'document'])],
 }
 
+// ---------------------------------------------------------------------------
+// Frame (legacy HTML)
+
+/**
+ * A page from another site in a frame, as legacy HTML has it (decision 0020). The part shows
+ * where the page comes from and its name; the page itself loads only when the author asks for
+ * a preview, sandboxed as it will be published. An address the host does not allow stays a link.
+ */
+const FrameEdit = defineComponent({
+  name: 'ProzaFrame',
+  props,
+  setup(p) {
+    const ui = useUi()
+    const { editor, t } = ui
+    const reach = useReach(() => p.id)
+    const preview = ref(false)
+    const address = ref(str(p.node, 'src'))
+    const title = ref(str(p.node, 'title'))
+    // Undo and the source view change the part under the fields.
+    watch(() => [p.node.attrs.src, p.node.attrs.title], () => { address.value = str(p.node, 'src'); title.value = str(p.node, 'title') })
+    const sites = (): string => t.either([
+      ...(editor.legacy?.policy.frames ?? []).map((f) => (typeof f === 'string' ? f : f.host)),
+      ...embedProviders().map((x) => x.name),
+    ])
+    const save = (): void => {
+      const src = safeUrl(address.value.trim()) ?? ''
+      editor.setAttrs(p.id, { src, title: title.value.trim() }, t.frameSaved)
+    }
+    return () => {
+      const n = p.node
+      const w = p.wrapper
+      const tab = reach()
+      const src = str(n, 'src')
+      const allowed = src !== '' && editor.frameAllowed(src)
+      const editable = !editor.readOnly.value
+      const id = (k: string): string => `${n.id}-frame-${k}`
+      const sandbox = editor.legacy?.frame(src)
+      const head = h('div', { class: 'pz-html-head' }, [
+        h('span', { class: 'pz-frame-name' }, [h('strong', null, editor.strings.blockNames[FRAME] ?? FRAME), src !== '' ? h('span', { class: 'pz-frame-host' }, httpsHost(src) ?? src) : null]),
+        allowed ? h('button', {
+          type: 'button', class: ['btn', 'btn-s', 'btn-line', preview.value && 'is-on'], tabindex: tab, 'aria-pressed': preview.value ? 'true' : 'false',
+          onClick: () => { preview.value = !preview.value },
+        }, t.rawHtmlPreview) : null,
+      ])
+      const body = preview.value && allowed
+        ? h('iframe', {
+          class: 'pz-html-preview pz-frame-preview', src, title: str(n, 'title') || src, referrerpolicy: 'strict-origin-when-cross-origin',
+          // As published: the host's sandbox for a listed site, the embed sandbox for a provider's player.
+          ...(sandbox === null ? {} : { sandbox: sandbox ?? EMBED_FRAME.sandbox }),
+        })
+        : editable
+          ? h('div', { class: 'pz-frame-fields' }, [
+            h('label', { class: 'lab', for: id('src') }, t.frameAddress),
+            h('input', {
+              id: id('src'), class: 'field', type: 'text', inputmode: 'url', tabindex: tab, value: address.value, placeholder: 'https://',
+              autocomplete: 'off', spellcheck: 'false', 'aria-invalid': src !== '' && !allowed ? 'true' : undefined, 'aria-describedby': id('hint'),
+              onInput: (e: Event) => { address.value = (e.target as HTMLInputElement).value },
+              onChange: save,
+            }),
+            h('p', { class: ['hint', src !== '' && !allowed && 'is-error'], id: id('hint') }, src !== '' && !allowed ? t.frameNotAllowed : t.frameSites(sites())),
+            h('label', { class: 'lab', for: id('title') }, t.frameTitle),
+            h('input', {
+              id: id('title'), class: 'field', type: 'text', tabindex: tab, value: title.value,
+              onInput: (e: Event) => { title.value = (e.target as HTMLInputElement).value },
+              onChange: save,
+            }),
+          ])
+          : h('p', { class: 'hint' }, str(n, 'title') || src)
+      return h('div', { ...w, role: 'group', class: [...w.class, 'pz-html-part', 'pz-frame-part'] }, [head, body])
+    }
+  },
+})
+
+const frameEditing: BlockEditing = {
+  name: FRAME,
+  offByDefault: true,
+  fields: [],
+  title: name(FRAME),
+  label: (n, s) => s.blockLabel(s.blockNames[FRAME] ?? FRAME, excerpt(str(n, 'title')) || (httpsHost(str(n, 'src')) ?? '')),
+  inserter: [mediaItem(FRAME, { ink: ['M6 4h84v40H6z', 'M6 12h84'], accent: ['M16 20h30v16H16z', 'M54 20h26M54 28h20'] }, ['iframe', 'frame', 'map', 'form', 'calendar'])],
+}
+
 const join = (schema: RenderableBlock, def: BlockEditing, edit: Component, inspector: Component): BlockDefinition =>
   defineBlock({ ...schema, ...def, edit, inspector, a11y: checksFor(schema.name), parse: mediaParse[schema.name] ?? [] })
 
@@ -550,4 +634,5 @@ export const mediaBlockDefinitions: readonly BlockDefinition[] = [
   join(audio, audioEditing, AudioEdit, AudioInspector),
   join(embed, embedEditing, EmbedEdit, EmbedInspector),
   join(file, fileEditing, FileEdit, FileInspector),
+  defineBlock({ ...frame, ...frameEditing, edit: FrameEdit, a11y: checksFor(FRAME), parse: mediaParse[FRAME] ?? [] }),
 ]

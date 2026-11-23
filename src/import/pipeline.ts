@@ -8,7 +8,8 @@
  * Foreign HTML is parsed with `DOMParser` into an inert document and never
  * assigned to live DOM. Nothing here throws on content.
  */
-import { type FormatRegistry, defaultFormats } from '../model/richtext'
+import { type LegacyPolicy, legacyRules } from '../model/legacy'
+import { type FormatRegistry, defaultFormats, legacyFormats } from '../model/richtext'
 import { DOC_VERSION, validateDoc } from '../model/schema'
 import { type Block, createId as defaultId } from '../model/tree'
 import { cleanup, footnotes, inlineClassStyles, tablesToText } from './cleanup'
@@ -38,6 +39,12 @@ export interface ImportOptions {
   readonly notes?: readonly ReportNote[]
   /** The host offers justified text: imported justified paragraphs keep it. */
   readonly justify?: boolean
+  /**
+   * Keep legacy HTML (decision 0020): inline styles and the host's classes on parts and text
+   * as the policy says, boxes with them as groups, named anchors and icons, frames of the sites it
+   * lists, and what has no part of its own as raw HTML (when that part is installed). `true` is the default policy.
+   */
+  readonly legacy?: LegacyPolicy | true
 }
 
 export interface ReportNote { readonly code: ReportCode; readonly detail?: string }
@@ -73,7 +80,8 @@ export function importHtml(html: string, blocks: readonly ImportBlock[] | Readon
     report.add('truncated')
     return { blocks: [], report: report.report(options.source ?? 'html'), pending: [] }
   }
-  const source = options.source ?? detectSource(html)
+  // Legacy output is plain HTML that reads back as such; a stray class of Proza's in it does not make it Proza's exact output.
+  const source = options.source ?? detectSource(html, options.legacy !== undefined)
   const doc = new DOMParser().parseFromString(html, 'text/html')
   const body = doc.body
   if (source !== 'proza') inlineClassStyles(doc)
@@ -83,13 +91,18 @@ export function importHtml(html: string, blocks: readonly ImportBlock[] | Readon
   if (!list.some((b) => b.name === 'core/table')) tablesToText(body, report)
   else if (list.some((b) => b.name === 'core/table-cell')) tablesToText(body, report, 'table table')
 
+  const legacy = options.legacy ? legacyRules(options.legacy) : null
+  const base = options.formats ?? defaultFormats
   const state: ImportState = {
     source,
-    formats: options.formats ?? defaultFormats,
+    // Legacy markup needs its formats; a host that keeps it passes them already (`legacyFormats`).
+    formats: legacy && !base.has('span') ? legacyFormats(base) : base,
+    legacy,
     palette: options.palette ?? [],
     report,
     exact: source === 'proza',
-    lang: source === 'proza' ? '' : dominantLanguage(doc),
+    // Legacy HTML keeps every language mark as written, not only those that differ from most of the text.
+    lang: source === 'proza' || legacy ? '' : dominantLanguage(doc),
     classes: options.classes ?? {},
     sizes: new Map(),
     fonts: new Set(),

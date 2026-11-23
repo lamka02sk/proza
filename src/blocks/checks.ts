@@ -42,6 +42,10 @@ export const audioRules: readonly BlockRule[] = [(n) =>
 export const embedRules: readonly BlockRule[] = [(n) =>
   str(n, 'url') !== '' && str(n, 'title').trim() === '' ? [{ rule: 'embed-title', group: 'media', severity: 'warning', blockId: n.id }] : []]
 
+/** A frame is named by its title (WCAG 4.1.2). */
+export const frameRules: readonly BlockRule[] = [(n) =>
+  str(n, 'src') !== '' && str(n, 'title').trim() === '' ? [{ rule: 'frame-title', group: 'media', severity: 'warning', blockId: n.id }] : []]
+
 // ---------------------------------------------------------------------------
 // Structure
 
@@ -169,7 +173,7 @@ export const buttonRules: readonly BlockRule[] = [(n) => {
 
 /** The rules of each core type, for the definitions to join. */
 const CORE: Readonly<Record<string, readonly BlockRule[]>> = {
-  'core/image': imageRules, 'core/video': videoRules, 'core/audio': audioRules, 'core/embed': embedRules,
+  'core/image': imageRules, 'core/video': videoRules, 'core/audio': audioRules, 'core/embed': embedRules, 'core/frame': frameRules,
   [HEADING]: headingRules, [PARAGRAPH]: paragraphRules, 'core/table': tableRules, 'core/button': buttonRules,
 }
 

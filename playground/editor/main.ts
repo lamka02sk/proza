@@ -128,6 +128,8 @@ const proza = createEditor({
   ...(params.has('locking') ? { locking: true } : {}),
   ...(params.has('plugin') ? { plugins: [demoPlugin] } : {}),
   ...(params.has('justify') ? { justify: true } : {}),
+  // Legacy HTML (decision 0020): styles and classes kept, frames of a map site allowed.
+  ...(params.has('legacy') ? { legacy: { frames: ['maps.example.org'] } } : {}),
   // `?onsave=block`: the checker keeps the text from saving while errors remain.
   ...(params.get('onsave') === 'block' ? { a11y: { onSave: 'block' as const } } : {}),
   // `?hooks` records the host hooks; `?library` adds a stand-in attachment manager.

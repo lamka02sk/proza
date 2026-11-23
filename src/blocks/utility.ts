@@ -69,7 +69,8 @@ export const rawHtml = defineSchema({
   attrs: { html: { type: 'string', maxLength: 100_000 } },
   render: (b, ctx) => {
     const safe = b.attrs.html.trim() === '' ? EMPTY_HTML : ctx.rawHtml(b.attrs.html)
-    return safe === EMPTY_HTML ? EMPTY_HTML : h('div', { class: 'pz-html' }, safe)
+    // Legacy HTML puts the markup back where it was, without a box of Proza's around it.
+    return safe === EMPTY_HTML || ctx.legacy ? safe : h('div', { class: 'pz-html' }, safe)
   },
 })
 

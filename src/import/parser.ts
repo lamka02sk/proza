@@ -5,13 +5,16 @@
  * their styles to what they held; pictures and players inside text move out
  * to blocks of their own, splitting the text around them.
  */
+import { parseStyle } from '../model/css'
+import { embedFor, isPlayerUrl } from '../model/embeds'
+import { cleanStyle, joinStyle, keepClasses } from '../model/legacy'
 import { type FormatRange, type RichTextValue, normalize } from '../model/richtext'
 import { type BlockSchema, attrSpecs } from '../model/schema'
 import { safeUrl } from '../model/url'
 import { BLOCK_TAGS, type ImportState, type Inherit, InlineReader, REPORTED_DROP, ROOT_INHERIT, SILENT_DROP } from './inline'
 import type { RawBlock } from './raw'
 import type { ImportBlock, ParseContext, ParseRule } from './rules'
-import { parseLength, parseStyle, widthPreset } from './style'
+import { parseLength, widthPreset } from './style'
 
 /** A picture whose bytes must be uploaded, or found by the author. */
 export interface PendingFile {
@@ -34,6 +37,12 @@ const LIFT = new Set(['img', 'video', 'audio', 'iframe'])
 const BLOCKISH = [...BLOCK_TAGS, ...LIFT].join(',')
 // Below the schema's MAX_DEPTH (128): blocks nest no deeper than elements, so an import always loads.
 const MAX_DEPTH = 120
+/** Presentational attributes of old HTML as the declarations they stand for (legacy HTML). */
+const PRESENTATIONAL: Readonly<Record<string, string>> = { width: 'width', height: 'height', bgcolor: 'background-color', valign: 'vertical-align' }
+const PRESENTATIONAL_TAGS = new Set(['table', 'tr', 'td', 'th'])
+/** Elements legacy HTML keeps whole, as raw HTML, when that part is installed: nothing else could hold them. */
+const RAW = new Set([...REPORTED_DROP, 'form'].filter((t) => !['iframe', 'video', 'audio', 'frame', 'frameset'].includes(t)))
+const RAW_HTML = 'core/html'
 const RASTER = /^data:(image\/(?:png|jpeg|jpg|gif|webp|avif|bmp));base64,([a-z0-9+/=\s]+)$/i
 
 interface Bound { readonly rule: ParseRule; readonly type: string; readonly order: number }
@@ -79,7 +88,8 @@ export class BlockParser {
 
   #liftable(el: Element): boolean {
     if (!LIFT.has(el.localName)) return false
-    return el.localName !== 'img' || (!this.#st.exact && !this.#small(el))
+    // Legacy HTML keeps pictures where the text has them.
+    return el.localName !== 'img' || (!this.#st.exact && !this.#st.legacy && !this.#small(el))
   }
 
   #blockish(n: Node): boolean {
@@ -112,7 +122,7 @@ export class BlockParser {
       if (n.nodeType !== 1) continue
       const el = n as Element
       if (this.#consumed.has(el)) continue
-      if (!this.#blockish(el)) { run.push(el); continue }
+      if (!this.#blockish(el) && !this.#keptWhole(el)) { run.push(el); continue }
       flush()
       // Pushed one by one throughout: spreading a long list into push() passes the engine's argument limit (Chromium).
       for (const b of this.#element(el, scope, depth)) out.push(b)
@@ -121,10 +131,15 @@ export class BlockParser {
     return out
   }
 
+  /** Legacy HTML: an element between parts that only raw HTML can hold (a form, a picture in SVG) is a part of its own. */
+  #keptWhole(el: Element): boolean {
+    return this.#st.legacy !== null && RAW.has(el.localName) && this.#schemas.has(RAW_HTML)
+  }
+
   /** Inline content between blocks: one paragraph. */
   #loose(run: readonly Node[], scope: Scope): RawBlock[] {
     // Whitespace between blocks is layout of the source, never text.
-    if (run.every((n) => n.nodeType === 3 && (n as Text).data.trim() === '')) return []
+    if (run.every((n) => n.nodeType === 3 && (n as Text).data.replaceAll('\uFFFC', '').trim() === '')) return []
     this.#st.sizes = new Map()
     const content = this.#reader.read(run, this.#inherit(scope.inline, scope.lang))
     if (content.text === '') return []
@@ -134,6 +149,13 @@ export class BlockParser {
 
   #inherit(base: Inherit, lang: string): Inherit {
     const l = (lang || this.#st.lang).toLowerCase()
+    // A language span from around the block that says the block's own language says nothing more.
+    const mark = base.marks.get('lang')
+    if (mark && (mark.attrs?.lang ?? '').toLowerCase() === l && l !== '') {
+      const marks = new Map(base.marks)
+      marks.delete('lang')
+      return { ...base, marks, lang: l, base: l }
+    }
     return { ...base, lang: l, base: l }
   }
 
@@ -150,7 +172,7 @@ export class BlockParser {
     const mapped = this.#mappedBlock(el)
     if (mapped) {
       this.#st.sizes = new Map()
-      const content = this.#reader.read(el.childNodes, this.#inherit(this.#reader.styled(el, scope.inline), scope.lang))
+      const content = this.#reader.read(el.childNodes, this.#inherit(this.#reader.styled(el, scope.inline, this.#st.legacy !== null), scope.lang))
       return this.#finish({ type: mapped.block, attrs: { ...this.#supports(el, scope), content, ...mapped.attrs } }, this.#schemas.get(mapped.block))
     }
     for (const bound of this.#rules) {
@@ -162,9 +184,32 @@ export class BlockParser {
       const block = this.#apply(el, bound, scope, depth)
       if (block) return block
     }
+    if (this.#st.legacy && RAW.has(tag) && this.#schemas.has(RAW_HTML)) return this.#raw(el)
     if (REPORTED_DROP.has(tag)) { this.#st.report.add('element', tag); return [] }
     if (tag === 'details' || tag === 'fieldset' || tag === 'form') this.#st.report.add('structure', tag)
     return this.#blocks([...el.childNodes], this.#scope(el, scope), depth + 1)
+  }
+
+  /**
+   * Legacy HTML: an element nothing else can hold, kept as raw HTML. Scripts, handlers and
+   * unsafe addresses go here; what may be published is still the host's sanitiser's call.
+   */
+  #raw(el: Element): RawBlock[] {
+    const copy = el.cloneNode(true) as Element
+    for (const n of [copy, ...copy.querySelectorAll('*')]) {
+      // Office namespaces are word processors' bookkeeping (`o:p`); a later read would drop them, so the first does.
+      if (n !== copy && (SILENT_DROP.has(n.localName) || /^(?:o|v|w|m|st1):/.test(n.localName))) { n.remove(); continue }
+      for (const a of [...n.attributes]) {
+        const name = a.name.toLowerCase()
+        const unsafe = name.startsWith('on') || name === 'srcdoc' || name === 'formaction'
+          || (['href', 'src', 'action', 'data', 'poster', 'xlink:href'].includes(name) && safeUrl(a.value) === null)
+        if (unsafe) n.removeAttribute(a.name)
+      }
+    }
+    const html = copy.outerHTML
+    if (html.length > 100_000) { this.#st.report.add('element', el.localName); return [] }
+    this.#st.report.add('structure', el.localName)
+    return [{ type: RAW_HTML, attrs: { html } }]
   }
 
   /** Text with blocks inside (a picture in a paragraph): the text before, the block, the text after, each its own part. */
@@ -206,7 +251,8 @@ export class BlockParser {
     // A container that carries the language itself does not hand it to its children again.
     let children: RawBlock[] | undefined
     if (match.children) {
-      const inner = this.#scope(el, scope, false)
+      // A legacy part keeps its own look; its content does not take it again.
+      const inner = this.#st.legacy ? this.#ownScope(el, scope) : this.#scope(el, scope, false)
       children = this.#blocks([...match.children], schema.supports?.language ? { ...inner, lang: '', dir: '' } : inner, depth + 1)
       // An empty table cell still needs a paragraph to keep its column and accept a caret.
       if (bound.type === 'core/table-cell' && children.length === 0) children.push({ type: 'core/paragraph', attrs: {} })
@@ -220,6 +266,13 @@ export class BlockParser {
     if (!schema) return []
     const specs = attrSpecs(schema)
     let attrs: Record<string, unknown> = Object.fromEntries(Object.entries(raw.attrs).filter(([k, v]) => k in specs && v !== undefined))
+    const legacy = this.#st.legacy !== null
+    if (legacy && typeof attrs.htmlStyle === 'string') {
+      // Alignment a part has a control for is that control; any other stays in the style as written.
+      const decls = parseStyle(attrs.htmlStyle)
+      if (specs.textAlign && typeof attrs.textAlign === 'string' && attrs.textAlign !== '') decls.delete('text-align')
+      attrs = { ...attrs, htmlStyle: joinStyle(decls) }
+    }
     const content = attrs.content as RichTextValue | undefined
     const container = schema.children !== undefined && schema.children !== false
     // A player or file without an address shows nothing; only a picture waiting for its upload keeps its place.
@@ -228,11 +281,14 @@ export class BlockParser {
       this.#st.report.add('element', schema.name.replace(/^core\//, ''))
       return []
     }
-    if (content && specs.content?.type === 'richtext' && !container && !this.#st.exact && content.text.trim() === '' && !content.text.includes('￼')) {
+    // Legacy HTML keeps every paragraph it had, an empty line of a no-break space included: it is the source's spacing.
+    const blank = content !== undefined && !legacy && content.text.trim() === ''
+    // An object (a picture in the text) is content; a stray U+FFFC of the source is not.
+    if (content && specs.content?.type === 'richtext' && !container && !this.#st.exact && blank && !content.formats.some((f) => this.#st.formats.get(f.type)?.object === true)) {
       this.#st.report.add('empty')
       return []
     }
-    if (content && schema.supports?.color && !attrs.color && !this.#st.exact) {
+    if (content && schema.supports?.color && !attrs.color && !this.#st.exact && !legacy) {
       const whole = content.formats.filter((f) => f.type === 'color' && f.start === 0 && f.end === content.text.length)
       if (whole.length === 1 && content.text !== '') {
         attrs = { ...attrs, color: whole[0]!.attrs?.color ?? '', content: normalize({ text: content.text, formats: content.formats.filter((f: FormatRange) => f !== whole[0]) }, this.#st.formats) }
@@ -241,12 +297,20 @@ export class BlockParser {
     let fontPx: number | undefined, chars = 0
     const styled = [...sizes].filter(([px]) => px !== null)
     for (const [, n] of sizes) chars += n
-    if (styled.length === 1 && !sizes.has(null)) fontPx = styled[0]![0]!
+    // Legacy HTML keeps font sizes as they were written: no presets from them.
+    if (legacy) { /* sizes stay in the text's styles */ } else if (styled.length === 1 && !sizes.has(null)) fontPx = styled[0]![0]!
     else if (styled.length > 1 || (styled.length === 1 && sizes.has(null))) {
       // Sizes that change inside one block cannot become a preset.
       if (!this.#st.exact) this.#st.report.add('size')
     }
     return [{ ...raw, attrs, ...(fontPx !== undefined ? { fontPx } : {}), chars }]
+  }
+
+  /** What a legacy part passes to its content: its formats, not the look it keeps itself (alignment, kept styles). */
+  #ownScope(el: Element, scope: Scope): Scope {
+    const dir = el.getAttribute('dir') ?? scope.dir
+    const lang = BLOCK_TAGS.has(el.localName) ? el.getAttribute('lang')?.trim() ?? scope.lang : scope.lang
+    return { inline: this.#reader.styled(el, scope.inline, true), textAlign: '', lang, dir }
   }
 
   /** What an unwrapped element passes on: its inline styles, alignment, language and direction. */
@@ -271,8 +335,8 @@ export class BlockParser {
       case 'end': return 'end'
       case 'start': return ''
       case 'justify':
-        // Off by default because it harms readability; a host may offer it.
-        if (this.#st.justify === true) return 'justify'
+        // Off by default because it harms readability; a host may offer it. Legacy HTML keeps what it had.
+        if (this.#st.justify === true || this.#st.legacy) return 'justify'
         if (report) this.#st.report.add('justify')
         return ''
       default: return ''
@@ -291,7 +355,8 @@ export class BlockParser {
   #anchor(el: Element): string {
     const id = el.id || (el.localName === 'a' ? el.getAttribute('name') ?? '' : '')
     if (!/^[A-Za-z][\w-]{0,99}$/.test(id) || this.#anchors.has(id)) return ''
-    if (!this.#st.exact && !this.#referenced.has(id)) return ''
+    // Legacy HTML keeps every id: other pages may link to it.
+    if (!this.#st.exact && !this.#st.legacy && !this.#referenced.has(id)) return ''
     this.#anchors.add(id)
     return id
   }
@@ -302,7 +367,8 @@ export class BlockParser {
     const classes = [...el.classList]
     const cls = (prefix: string): string | undefined => classes.find((c) => c.startsWith(prefix))?.slice(prefix.length)
     let anchor = this.#anchor(el)
-    if (anchor === '' && !st.exact) {
+    // In legacy HTML a named link stays where it is (an anchor in the text).
+    if (anchor === '' && !st.exact && !st.legacy) {
       // TinyMCE's anchor plugin puts an empty named link at the start of the text.
       const a = el.querySelector(':scope > a[id]:empty, :scope > a[name]:empty')
       if (a) anchor = this.#anchor(a)
@@ -320,12 +386,17 @@ export class BlockParser {
     const lang = el.getAttribute('lang')?.trim() ?? (st.exact ? '' : scope.lang)
     if (lang && (st.exact || lang.toLowerCase() !== st.lang)) out.lang = lang
     const elDir = el.getAttribute('dir')
-    if (st.exact ? elDir === 'rtl' || elDir === 'ltr' : dir === 'rtl') out.dir = st.exact ? elDir : 'rtl'
+    const exactDir = st.exact || st.legacy !== null
+    if (exactDir ? elDir === 'rtl' || elDir === 'ltr' : dir === 'rtl') out.dir = exactDir ? elDir : 'rtl'
     for (const [key, prefix] of [['align', 'pz-align-'], ['size', 'pz-size-'], ['color', 'pz-color-'], ['bleed', 'pz-bleed-'], ['variant', 'pz-style-']] as const) {
       const v = cls(prefix)
       if (v) out[key] = v
     }
-    if (!st.exact && !/^(?:li|ul|ol|menu)$/.test(el.localName)) {
+    if (st.legacy) {
+      const kept = this.#kept(el)
+      if (kept.style !== '') out.htmlStyle = kept.style
+      if (kept.className !== '') out.htmlClass = kept.className
+    } else if (!st.exact && !/^(?:li|ul|ol|menu)$/.test(el.localName)) {
       for (const prop of ['margin-left', 'padding-left', 'text-indent', 'margin-inline-start', 'padding-inline-start']) {
         const len = style.get(prop) ? parseLength(style.get(prop)!) : null
         if (len && 'px' in len && len.px >= 20) { st.report.add('indent'); break }
@@ -334,15 +405,36 @@ export class BlockParser {
     return out
   }
 
+  /** An element's own style (with what its presentational attributes say) and classes, as the legacy policy keeps them. */
+  #kept(el: Element): { style: string; className: string } {
+    const lg = this.#st.legacy
+    if (!lg) return { style: '', className: '' }
+    const decls = new Map<string, string>()
+    if (PRESENTATIONAL_TAGS.has(el.localName)) {
+      for (const [attr, prop] of Object.entries(PRESENTATIONAL)) {
+        const v = el.getAttribute(attr)?.trim() ?? ''
+        if (v !== '') decls.set(prop, /^\d+$/.test(v) && (prop === 'width' || prop === 'height') ? `${v}px` : v)
+      }
+      if (el.hasAttribute('nowrap')) decls.set('white-space', 'nowrap')
+    }
+    for (const [k, v] of parseStyle(el.getAttribute('style'))) { decls.delete(k); decls.set(k, v) }
+    const style = cleanStyle(joinStyle(decls), lg.style)
+    const className = keepClasses([...el.classList].filter((c) => this.#st.classes[c] === undefined).join(' '), lg.className)
+    return { style, className }
+  }
+
   #context(el: Element, scope: Scope): ParseContext {
     const st = this.#st
     const lang = el.getAttribute('lang')?.trim() || scope.lang
-    const styled = this.#reader.styled(el, scope.inline)
+    const styled = this.#reader.styled(el, scope.inline, st.legacy !== null)
     // A block on an inline element (a button's link): its language is the block's (`supports`), not a span in its text.
     const own = !BLOCK_TAGS.has(el.localName) && el.hasAttribute('lang')
     const inherit = this.#inherit(own ? { ...styled, marks: new Map([...styled.marks].filter(([k]) => k !== 'lang')) } : styled, lang)
     return {
       source: st.source,
+      legacy: st.legacy !== null,
+      frame: (src) => st.legacy !== null && (st.legacy.frame(src) !== undefined || isPlayerUrl(src) || (embedFor(src) !== null && /^https:/i.test(src.trim()))),
+      kept: (target) => this.#kept(target),
       richText: (nodes, options) => {
         const list = 'nodeType' in nodes ? [nodes] : [...nodes]
         return this.#reader.read(list, inherit, options?.preformatted ?? false)
@@ -401,6 +493,8 @@ export class BlockParser {
 
   #imageLayout(img: Element, scope: Scope): { width?: 's' | 'm' | 'l'; align?: 'start' | 'center' | 'end' } {
     const out: { width?: 's' | 'm' | 'l'; align?: 'start' | 'center' | 'end' } = {}
+    // Legacy HTML keeps the picture's own size and float in its style.
+    if (this.#st.legacy) return out
     const style = parseStyle(img.getAttribute('style'))
     const rawWidth = style.get('width') ?? img.getAttribute('width')
     const width = rawWidth ? parseLength(rawWidth) : null

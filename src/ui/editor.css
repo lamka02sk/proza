@@ -652,6 +652,11 @@ textarea.field { block-size: auto; padding: 8px 10px; resize: vertical; }
 .pz-html-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-block-end: 6px; font-size: 13px; color: var(--ink-2); }
 .pz-html-code { min-block-size: 120px; font: 13px/1.5 ui-monospace, monospace; resize: vertical; padding-block: 8px; block-size: auto; }
 .pz-html-preview { display: block; inline-size: 100%; min-block-size: 160px; border: 0; border-radius: 6px; background: #FFFFFF; }
+.pz-frame-name { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; min-inline-size: 0; }
+.pz-frame-host { overflow-wrap: anywhere; }
+.pz-frame-fields { display: grid; gap: 4px; }
+.pz-frame-fields .lab:not(:first-child) { margin-block-start: 6px; }
+.pz-frame-preview { min-block-size: 320px; }
 
 /* ------------------------------------------------------------------------
    More tools: the find bar, the character picker, counts, the page as published. */

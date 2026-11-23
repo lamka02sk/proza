@@ -2,11 +2,14 @@
  * JSON to HTML. Pure: no DOM, safe on a server.
  * The same document always renders to the same bytes.
  */
-import { type FormatRange, type FormatRegistry, type RichNode, type RichTextValue, defaultFormats, formatAttrs, toTree } from '../model/richtext'
+import { embedFor, isPlayerUrl } from '../model/embeds'
+import { type LegacyPolicy, type LegacyRules, cleanStyle, keepClasses, legacyRules } from '../model/legacy'
+import { type FormatRange, type FormatRegistry, type FormatSpec, type RichNode, type RichTextValue, defaultFormats, formatAttrs, toTree } from '../model/richtext'
 import { type AttrSpecs, type AttrsOf, type BlockSchema, UNSUPPORTED, type ValidateOptions, validateDoc } from '../model/schema'
 import type { Block } from '../model/tree'
-import { type Child, EMPTY_HTML, type Html, type HtmlAttrs, RenderError, cx, fragment, h, hostHtml } from './html'
+import { type Child, EMPTY_HTML, type Html, type HtmlAttrs, type OutputProfile, RenderError, allowedAttr, allowedTag, cx, fragment, h, hostHtml, withOutput } from './html'
 import type { Token } from './highlight'
+import { EMBED_FRAME } from './sanitize'
 
 /** A block as its renderer sees it: attributes typed from its schema. */
 export interface RenderBlock<A extends AttrSpecs> {
@@ -51,6 +54,12 @@ export interface RenderContext {
   rawHtml(html: string): Html
   /** The headings of the document in reading order, with the anchors they render with (a table of contents). */
   outline(): readonly OutlineEntry[]
+  /** The host keeps legacy HTML (decision 0020): plain markup, its styles and classes, no class that needs Proza's stylesheet where a style says the same. */
+  readonly legacy: boolean
+  /** The `sandbox` a frame from `src` gets (null: none), or undefined when it may not be a frame: an embed provider's player, or a site the legacy policy lists. */
+  frame(src: string): string | null | undefined
+  /** A stored style and class list of an inner element (a picture's `<img>`) as the legacy policy publishes them; nothing without one. */
+  legacyAttrs(style: string, className: string): HtmlAttrs
 }
 
 /** A heading as a table of contents lists it. */
@@ -96,6 +105,12 @@ export interface RenderOptions {
    * published. Without it the block renders nothing. Its result goes into the page unchanged.
    */
   readonly rawHtml?: (html: string) => string | null
+  /**
+   * Keep legacy HTML (decision 0020): blocks and text render with the styles and classes
+   * the policy keeps, alignment and palette colours as inline styles, and frames of the sites it lists.
+   * `true` is the default policy.
+   */
+  readonly legacy?: LegacyPolicy | true
 }
 
 export interface RenderLabels {
@@ -225,11 +240,42 @@ export function renderBlocks(blocks: readonly Block[], registry: RenderRegistry,
     ...(options.highlight ? { highlight: options.highlight } : {}),
     ...(options.rawHtml ? { rawHtml: options.rawHtml } : {}),
     outline: outlineOf(blocks, registry),
+    legacy: options.legacy ? legacyRules(options.legacy) : null,
   }
-  const out = blocks.map((b) => renderBlock(b, [], WHOLE, env).html).filter((s) => s !== '')
-  const list = notes.list(labels)
-  if (list) out.push(list.html)
-  return out.join('\n')
+  return withOutput(env.legacy ? outputProfile(env.legacy) : null, () => {
+    const out = blocks.map((b) => renderBlock(b, [], WHOLE, env).html).filter((s) => s !== '')
+    const list = notes.list(labels)
+    if (list) out.push(list.html)
+    return out.join('\n')
+  })
+}
+
+/**
+ * Proza's classes a legacy page does without: what they did is an inline style there, or the
+ * markup reads back without them (a quote, code, a checklist, a table, a picture, footnotes).
+ * Classes of parts that have no plain HTML of their own (columns, buttons, galleries, players) stay.
+ */
+const DROPPED_CLASS = /^pz-(?:(?:text|align|size|bleed|width|tok)-|(?:quote|code|checklist|table|table-stack|image|fn|footnotes)$)/
+
+const profiles = new WeakMap<LegacyRules, OutputProfile>()
+
+/**
+ * The sandbox of a frame in legacy output: the host's for a site it lists, the embed sandbox
+ * for an address an embed provider knows (the player as the source wrote it), undefined otherwise.
+ */
+export function legacyFrame(rules: LegacyRules, src: string): string | null | undefined {
+  const listed = rules.frame(src)
+  if (listed !== undefined) return listed
+  return embedFor(src) !== null && /^https:/i.test(src.trim()) ? EMBED_FRAME.sandbox! : undefined
+}
+
+function outputProfile(rules: LegacyRules): OutputProfile {
+  let p = profiles.get(rules)
+  if (!p) {
+    p = { style: (text) => cleanStyle(text, rules.published), dropClass: (c) => DROPPED_CLASS.test(c), frame: (src) => legacyFrame(rules, src) }
+    profiles.set(rules, p)
+  }
+  return p
 }
 
 /** Collects footnote texts while a document renders and numbers their references. */
@@ -257,6 +303,7 @@ export class Footnotes {
 }
 
 interface Env {
+  readonly legacy: LegacyRules | null
   readonly registry: RenderRegistry
   readonly formats: FormatRegistry
   readonly notes: Footnotes
@@ -327,12 +374,12 @@ function renderBlock(block: Block, ancestors: readonly Block[], share: Share, en
     ancestors,
     share,
     measure: env.measure,
-    richText: (value, opts) => richText(value, env.formats, opts?.preformatted ?? false, env.notes),
+    richText: (value, opts) => richText(value, env.formats, opts?.preformatted ?? false, env.notes, env.legacy),
     children: () => fragment((block.children ?? []).map((c, i) => {
       const own = def.childShare?.(typed, i, parent) ?? WHOLE
       return renderBlock(c, inside, { wide: share.wide * own.wide, narrow: share.narrow * own.narrow }, env)
     })),
-    wrapper: (extra = {}) => wrapper(block, parent, extra, env.outline.anchors.get(block.id)),
+    wrapper: (extra = {}) => wrapper(block, ancestors, extra, env.outline.anchors.get(block.id), env.legacy),
     labels: env.labels,
     code: (text, language) => code(text, language, env),
     rawHtml: (html) => {
@@ -340,6 +387,15 @@ function renderBlock(block: Block, ancestors: readonly Block[], share: Share, en
       return typeof safe === 'string' ? hostHtml(safe) : EMPTY_HTML
     },
     outline: () => env.outline.entries,
+    legacy: env.legacy !== null,
+    frame: (src) => {
+      const legacy = env.legacy ? legacyFrame(env.legacy, src) : undefined
+      if (legacy !== undefined) return legacy
+      return isPlayerUrl(src) ? EMBED_FRAME.sandbox! : undefined
+    },
+    legacyAttrs: (style, className) => (env.legacy
+      ? { style: cleanStyle(style, env.legacy.style) || null, class: keepClasses(className, env.legacy.className) || null }
+      : {}),
   }
   return def.render(typed, ctx)
 }
@@ -355,17 +411,59 @@ export function supportClasses(attrs: Readonly<Record<string, unknown>>, topLeve
   return out
 }
 
-function wrapper(block: Block, parent: Block | null, extra: HtmlAttrs, generated?: string): HtmlAttrs {
+function wrapper(block: Block, ancestors: readonly Block[], extra: HtmlAttrs, generated: string | undefined, legacy: LegacyRules | null): HtmlAttrs {
   const str = (k: string): string | null => {
     const v = block.attrs[k]
     return typeof v === 'string' && v !== '' ? v : null
   }
   const extraClass = typeof extra.class === 'string' ? extra.class : null
+  const id = str('anchor') ?? generated ?? null
+  if (!legacy) return { id, ...extra, class: cx(extraClass, ...supportClasses(block.attrs, ancestors.length === 0)), lang: str('lang'), dir: str('dir') }
+  const { style, classes } = legacyLook(block, ancestors, legacy)
+  const extraStyle = typeof extra.style === 'string' ? extra.style : null
   return {
-    id: str('anchor') ?? generated ?? null, ...extra,
-    class: cx(extraClass, ...supportClasses(block.attrs, parent === null)),
+    id, ...extra,
+    class: cx(extraClass, ...classes, keepClasses(str('htmlClass'), legacy.className)),
     lang: str('lang'), dir: str('dir'),
+    style: [...style, extraStyle, cleanStyle(str('htmlStyle'), legacy.style)].filter((d) => d !== null && d !== '').join('; ') || null,
   }
+}
+
+/** Right to left where the block or a container says so. */
+function rtl(block: Block, ancestors: readonly Block[]): boolean {
+  for (const b of [block, ...[...ancestors].reverse()]) {
+    const dir = b.attrs.dir
+    if (dir === 'rtl') return true
+    if (dir === 'ltr') return false
+  }
+  return false
+}
+
+const SIZE_STYLE: Readonly<Record<string, string>> = { s: 'font-size: .882em', l: 'font-size: 1.176em; line-height: 1.45' }
+
+/**
+ * What a block's supports look like as inline styles in legacy output (content.css says the
+ * same with classes): alignment, size, a palette colour. A colour without a palette value
+ * stays a class for the host's stylesheet; the width of a part beyond the column has no plain form.
+ */
+function legacyLook(block: Block, ancestors: readonly Block[], legacy: LegacyRules): { style: string[]; classes: string[] } {
+  const a = block.attrs
+  const style: string[] = []
+  const classes: string[] = []
+  const right = rtl(block, ancestors) ? 'left' : 'right'
+  if (a.textAlign === 'center' || a.textAlign === 'justify') style.push(`text-align: ${a.textAlign}`)
+  else if (a.textAlign === 'end') style.push(`text-align: ${right}`)
+  else if (a.textAlign === 'start') style.push(`text-align: ${right === 'right' ? 'left' : 'right'}`)
+  if (a.align === 'center') style.push('margin-inline: auto')
+  else if (a.align === 'end') style.push('margin-inline-start: auto')
+  if (typeof a.size === 'string' && SIZE_STYLE[a.size]) style.push(SIZE_STYLE[a.size]!)
+  if (typeof a.color === 'string' && a.color !== '') {
+    const value = legacy.color(a.color)
+    if (value !== undefined) style.push(`color: ${value}`)
+    else classes.push(`pz-color-${a.color}`)
+  }
+  if (typeof a.variant === 'string' && a.variant !== '') classes.push(`pz-style-${a.variant}`)
+  return { style, classes }
 }
 
 /** Code with highlighting spans, or plain when there is no highlighter or the language is unknown. */
@@ -390,15 +488,15 @@ function code(text: string, language: string, env: Env): Html {
  * Rich text as inline HTML. Footnote references are numbered by `notes`; pass
  * the document's collector, or get a local numbering from 1.
  */
-export function richText(value: RichTextValue, formats: FormatRegistry = defaultFormats, preformatted = false, notes: Footnotes = new Footnotes()): Html {
-  const out: Child[] = nodes(toTree(value, formats), formats, preformatted, notes)
+export function richText(value: RichTextValue, formats: FormatRegistry = defaultFormats, preformatted = false, notes: Footnotes = new Footnotes(), legacy: LegacyRules | null = null): Html {
+  const out: Child[] = nodes(toTree(value, formats), formats, preformatted, notes, legacy)
   // A trailing line break needs a second <br> to show its empty line, as in the field.
   if (!preformatted && value.text.endsWith('\n')) out.push(h('br'))
   return fragment(out)
 }
 
-function nodes(list: readonly RichNode[], formats: FormatRegistry, pre: boolean, notes: Footnotes): Child[] {
-  return list.map((n) => ('text' in n ? text(n.text, pre) : element(n.format, () => nodes(n.children, formats, pre, notes), formats, notes)))
+function nodes(list: readonly RichNode[], formats: FormatRegistry, pre: boolean, notes: Footnotes, legacy: LegacyRules | null): Child[] {
+  return list.map((n) => ('text' in n ? text(n.text, pre) : element(n.format, () => nodes(n.children, formats, pre, notes, legacy), formats, notes, legacy)))
 }
 
 function text(s: string, pre: boolean): Child {
@@ -406,9 +504,42 @@ function text(s: string, pre: boolean): Child {
   return s.split('\n').flatMap((line, i) => (i === 0 ? [line] : [h('br'), line]))
 }
 
-function element(range: FormatRange, children: () => Child[], formats: FormatRegistry, notes: Footnotes): Html {
+function element(range: FormatRange, children: () => Child[], formats: FormatRegistry, notes: Footnotes, legacy: LegacyRules | null): Html {
   const spec = formats.get(range.type)
-  if (!spec) return h('span', { 'data-pz-format': range.type }, children())
+  // A format whose element only legacy output may contain renders as an unknown one without the policy.
+  if (!spec || !allowedTag(spec.tag)) return h('span', { 'data-pz-format': range.type }, spec?.object ? null : children())
   if (spec.type === 'footnote') return notes.reference(range.attrs?.note ?? '')
-  return h(spec.tag, formatAttrs(spec, range), spec.object ? null : children())
+  const given = legacy ? legacyFormatAttrs(spec, range, legacy) : formatAttrs(spec, range)
+  // Legacy formats rendered without a policy keep only what the standard allow-list has.
+  const attrs = Object.fromEntries(Object.entries(given).filter(([name]) => allowedAttr(spec.tag, name)))
+  return h(spec.tag, attrs, spec.object ? null : children())
+}
+
+/** CSS property a palette preset of a format stands for, in legacy output. */
+const PRESET_PROPERTY: Readonly<Record<string, string>> = { color: 'color', highlight: 'background-color' }
+
+/**
+ * A format's attributes in legacy output: palette presets as inline colours where the palette
+ * has one, the host's classes and styles as the policy keeps them.
+ */
+function legacyFormatAttrs(spec: FormatSpec, range: FormatRange, legacy: LegacyRules): Record<string, string> {
+  const attrs = formatAttrs(spec, range)
+  const style: string[] = []
+  const classes: string[] = []
+  for (const c of (attrs.class ?? '').split(' ')) {
+    if (c === '') continue
+    if (!c.startsWith('pz-')) { if (legacy.className(c)) classes.push(c); continue }
+    const prop = PRESET_PROPERTY[spec.type]
+    const preset = c.startsWith(`pz-${spec.type}-`) ? c.slice(`pz-${spec.type}-`.length) : null
+    const value = prop && preset !== null ? legacy.color(preset) : undefined
+    if (value !== undefined) style.push(`${prop!}: ${value}`)
+    else classes.push(c)
+  }
+  const own = cleanStyle(attrs.style, legacy.style)
+  if (own !== '') style.push(own)
+  // The class first, as `formatAttrs` writes it; the style last.
+  const out: Record<string, string> = classes.length > 0 ? { class: classes.join(' ') } : {}
+  for (const [k, v] of Object.entries(attrs)) if (k !== 'class' && k !== 'style') out[k] = v
+  if (style.length > 0) out.style = style.join('; ')
+  return out
 }

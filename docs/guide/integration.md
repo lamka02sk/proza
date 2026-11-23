@@ -102,6 +102,7 @@ Everything `createEditor` takes. Only `target` is required.
 | `rawHtml` | `false` | The raw HTML part. `true` offers it and `getHTML()` carries the markup as written, which the server must sanitise. A function sanitises it in the browser too. |
 | `locking` | `false` | Authors may lock and unlock parts. Locks in loaded content hold either way. |
 | `justify` | `false` | Offer justified text (it harms readability, so it is off). |
+| `legacy` | off | Keep legacy HTML: a policy (or `true` for the default one) of the styles, classes and frame sites that stay. See [legacy HTML](#legacy-html). |
 | `fonts` | `true` | Register the self-hosted interface fonts. `false` when the host serves them. |
 
 ## Reading and changing the document
@@ -177,6 +178,39 @@ hooks: {
 With this hook, Picture and File in the inserter open the host's library instead of inserting an empty part, and an empty picture or file part offers *Choose from the library* beside *Upload from this device* (when there is an adapter) and the web address. The library works without an upload adapter.
 
 `attachment` is `{ url, name, mimeType, bytes?, width?, height?, variants? }`. The editor takes only the first answer with its `requestId`, sent to the editor's own host element; it checks the address, and refuses a non-picture for a picture part. One request is open per editor; it is aborted when the author starts another, the content is replaced, the editor turns read-only, or it is destroyed. If the author changed the text the part was to replace while choosing, the text stays and the answer is dropped. Cancelling leaves no undo step and puts the focus back.
+
+## Legacy HTML
+
+A site that stores HTML, which other editors and its public pages read with stylesheets that know nothing of Proza, can keep that HTML as it is (decision 0020):
+
+```ts
+createEditor({
+  target: '#body',
+  contentSource: 'tinymce',
+  rawHtml: true, // what no part can hold (a form) stays as raw HTML; the server sanitises it
+  legacy: {
+    styles: ['color', 'background-color', 'font-size', 'font-family', 'text-align', 'margin*', 'padding*', 'border*', 'width', 'height'],
+    classes: ['note', 'btn', 'btn-*', 'icon', 'icon-*'],
+    frames: ['www.google.com', { host: 'forms.example.org', sandbox: false }],
+  },
+})
+```
+
+- HTML content and the source view keep the inline styles and classes the policy names, boxes with them (`<div class="note">`), named anchors, icons (`<i class="icon icon-file">`), link titles and classes, empty lines, table borders and column widths, and frames of the listed sites (and of the embed providers, as written). Pasted content is still converted to clean parts.
+- `getHTML()` writes plain HTML: no Proza class where a style says the same; alignment, size and palette colours as inline styles.
+- `styles` defaults to `LEGACY_STYLES` (how text and boxes look, nothing that takes an element out of the flow). `classes` defaults to every class. A listed frame gets `FRAME_SANDBOX` unless its entry says otherwise; `sandbox: false` gives it none.
+- Kept look shows in the editor; the interface has no controls for free colours or sizes.
+
+Check a store before switching: load each record and compare. `htmlLosses` counts equivalent markup (`<b>` and `<strong>`, `<font color>` and `style="color"`) as kept:
+
+```ts
+import { htmlLosses } from '@lamka02sk/proza'
+
+editor.setContent(record)
+const lost = htmlLosses(record, editor.getHTML()) // [] when a save changes nothing a page shows
+```
+
+Published pages then need inline styles allowed (`style-src-attr 'unsafe-inline'`) and the listed sites in `frame-src`. The editor itself still does not: it sets kept styles through the CSSOM.
 
 ## Content Security Policy
 

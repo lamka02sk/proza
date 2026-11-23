@@ -24,7 +24,8 @@ import { type ColorPreset, type LinkSearch, type Pattern, type StyleVariant, def
 import editorCss from './ui/editor.css?inline'
 import type { ParseRule } from './import/rules'
 import { type EmbedProvider, registerEmbedProvider } from './model/embeds'
-import { type FormatSpec, defaultFormats } from './model/richtext'
+import type { LegacyPolicy } from './model/legacy'
+import { type FormatSpec, defaultFormats, legacyFormats } from './model/richtext'
 import { ALLOWED } from './render/html'
 import type { InspectorPanel, ToolbarItem } from './ui/context'
 import { registerFonts } from './ui/fonts'
@@ -42,6 +43,9 @@ export type { ImportReport, ImportSource, ReportCode, ReportEntry } from './impo
 export type { ClassMapping } from './import/inline'
 export type { ParseContext, ParseMatch, ParseRule } from './import/rules'
 export { type ImportResult, importHtml, importText } from './import/pipeline'
+export { type HtmlLoss, htmlLosses } from './import/losses'
+export { FRAME_SANDBOX, LEGACY_STYLES, type LegacyFrame, type LegacyPolicy } from './model/legacy'
+export { legacyFormats } from './model/richtext'
 export type { EditorSelection } from './editor/selection'
 export { Autosave, type AutosaveOptions, type FoundDraft } from './editor/autosave'
 
@@ -224,6 +228,14 @@ export interface CreateEditorOptions {
    * its markup as written: the server must sanitise it. A function sanitises it in the browser too.
    */
   readonly rawHtml?: boolean | ((html: string) => string | null)
+  /**
+   * Keep legacy HTML (decision 0020), for a site that stores HTML other editors and pages
+   * read: HTML content keeps its inline styles, classes, named anchors, icons and the frames
+   * of the sites the policy lists, and `getHTML()` writes plain HTML with them, alignment and
+   * palette colours as inline styles. With `rawHtml` on, what no part can hold (a form) stays
+   * as raw HTML. Pasted content is still converted to clean parts. `true` is the default policy.
+   */
+  readonly legacy?: LegacyPolicy | true
   /** A fixed height (any CSS length) with the text scrolling inside; by default the field grows with its text (TinyMCE `autoresize`). */
   readonly height?: string
   /**
@@ -306,6 +318,12 @@ function paletteSheet(palette: readonly ColorPreset[]): CSSStyleSheet {
   return out
 }
 
+/** The host's legacy policy, with the theme's palette as values unless it names its own. */
+function legacyPolicy(policy: LegacyPolicy | true, palette: readonly ColorPreset[]): LegacyPolicy | true {
+  if (policy !== true && policy.palette) return policy
+  return { ...(policy === true ? {} : policy), palette: palette.map((c) => ({ name: c.name, color: c.color })) }
+}
+
 export function createEditor(options: CreateEditorOptions): ProzaEditor {
   const target = typeof options.target === 'string' ? document.querySelector<HTMLElement>(options.target) : options.target
   if (!target) throw new Error(`Proza: no element ${typeof options.target === 'string' ? options.target : 'given'}`)
@@ -330,7 +348,7 @@ function mount(host: HTMLElement, options: CreateEditorOptions): ProzaEditor {
   const locale = plugins.reduce((l, p) => extendLocale(l, p.locales?.[l.lang] ?? p.locales?.en), base)
   const { ui, ...strings } = locale
   for (const p of plugins) for (const e of p.embeds ?? []) registerEmbedProvider(e)
-  const formats = new Map(defaultFormats)
+  const formats = new Map(options.legacy ? legacyFormats() : defaultFormats)
   for (const p of plugins) {
     for (const f of p.formats ?? []) {
       if (!ALLOWED.has(f.tag)) throw new Error(`Plugin ${p.name}: format ${f.type} renders as <${f.tag}>, which output may not contain`)
@@ -358,7 +376,8 @@ function mount(host: HTMLElement, options: CreateEditorOptions): ProzaEditor {
     // Imported colours map to the palette the author is offered.
     import: { palette: readable(palette ?? defaultPalette(ui)), ...(options.import?.classes ? { classes: options.import.classes } : {}), ...(options.justify ? { justify: true } : {}) },
     ...(options.readOnly ? { readOnly: true } : {}),
-    ...(options.rawHtml ? { enable: ['core/html'] } : {}),
+    ...(options.rawHtml || options.legacy ? { enable: [...(options.rawHtml ? ['core/html'] : []), ...(options.legacy ? ['core/frame'] : [])] } : {}),
+    ...(options.legacy ? { legacy: legacyPolicy(options.legacy, readable(palette ?? defaultPalette(ui))) } : {}),
     ...(typeof options.rawHtml === 'function' ? { rawHtml: options.rawHtml } : {}),
     checks: plugins.flatMap((p) => p.checks ?? []),
     ...(options.a11y?.onSave ? { onSave: options.a11y.onSave } : {}),

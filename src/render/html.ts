@@ -66,26 +66,84 @@ export const INPUT_TYPES: ReadonlySet<string> = new Set(['checkbox'])
 /** Attribute names allowed on every element besides GLOBAL_ATTRS. */
 export const ATTR_PATTERN = /^(?:aria-[a-z]+|data-pz-[a-z][a-z0-9-]*)$/
 
+/**
+ * What legacy output (decision 0020) adds to the allow-list. Set only while a document
+ * renders with a host's legacy policy (`withOutput`), so every renderer, a plugin's
+ * included, gets the same rules without passing them along.
+ */
+export interface OutputProfile {
+  /** A `style` value as it may be published; '' drops the attribute. */
+  readonly style: (text: string) => string
+  /** A class token Proza's own markup may leave out. */
+  readonly dropClass: (name: string) => boolean
+  /** The sandbox of a frame that is not a provider's player: its value, null for none, undefined when not allowed. */
+  readonly frame: (src: string) => string | null | undefined
+}
+
+/** Elements legacy output adds, with their own attributes. */
+export const LEGACY_ELEMENTS: ReadonlyMap<string, ReadonlySet<string>> = new Map(Object.entries({
+  colgroup: ['span'], col: ['span'], i: [],
+}).map(([tag, attrs]) => [tag, new Set(attrs)]))
+
+/** Attributes legacy output adds to elements already allowed. `style` is allowed on every element. */
+export const LEGACY_ATTRS: ReadonlyMap<string, ReadonlySet<string>> = new Map(Object.entries({
+  a: ['name'], table: ['border', 'cellpadding', 'cellspacing'], iframe: ['frameborder'],
+}).map(([tag, attrs]) => [tag, new Set(attrs)]))
+
+let output: OutputProfile | null = null
+
+/** Run `fn` with `profile` in force for every `h()` call it makes (null: the standard allow-list). Rendering is synchronous, so nothing else runs meanwhile. */
+export function withOutput<T>(profile: OutputProfile | null, fn: () => T): T {
+  const before = output
+  output = profile
+  try { return fn() } finally { output = before }
+}
+
+/** Whether `h()` accepts `tag` under the profile in force. */
+export function allowedTag(tag: string): boolean {
+  return ALLOWED.has(tag) || (output !== null && LEGACY_ELEMENTS.has(tag))
+}
+
+/** Whether `h()` accepts `name` on `tag` under the profile in force. */
+export function allowedAttr(tag: string, name: string): boolean {
+  const own = ALLOWED.get(tag) ?? (output ? LEGACY_ELEMENTS.get(tag) : undefined)
+  if (own?.has(name) || GLOBAL_ATTRS.has(name) || ATTR_PATTERN.test(name)) return true
+  return output !== null && (name === 'style' || LEGACY_ATTRS.get(tag)?.has(name) === true)
+}
+
 export class RenderError extends Error {
   override name = 'RenderError'
 }
 
 /** Build one element. Throws on a tag or attribute outside the allow-list: that is a bug in a renderer. */
 export function h(tag: string, attrs: HtmlAttrs | null = null, ...children: Child[]): Html {
-  const allowed = ALLOWED.get(tag)
+  const allowed = ALLOWED.get(tag) ?? (output ? LEGACY_ELEMENTS.get(tag) : undefined)
   if (!allowed) throw new RenderError(`Element <${tag}> is not allowed`)
   let out = `<${tag}`
   const a: Record<string, AttrValue> = { ...attrs }
   if (tag === 'a' && a.target === '_blank') a.rel = withNoopener(a.rel)
   if (tag === 'input' && !INPUT_TYPES.has(String(a.type))) throw new RenderError('Only checkbox inputs are allowed')
-  if (tag === 'iframe' && !(typeof a.src === 'string' && isPlayerUrl(a.src))) throw new RenderError('An iframe needs the player address of an allowed embed provider')
+  if (tag === 'iframe') {
+    const src = typeof a.src === 'string' ? a.src : ''
+    const listed = output && !isPlayerUrl(src) ? output.frame(src) : undefined
+    if (!isPlayerUrl(src) && listed === undefined) throw new RenderError('An iframe needs the player address of an allowed embed provider')
+    // A listed site's frame gets the sandbox its host chose, whatever the renderer passed.
+    if (listed !== undefined) a.sandbox = listed
+  }
   for (const [name, value] of Object.entries(a)) {
-    if (!allowed.has(name) && !GLOBAL_ATTRS.has(name) && !ATTR_PATTERN.test(name)) {
-      throw new RenderError(`Attribute ${name} is not allowed on <${tag}>`)
-    }
+    if (!allowedAttr(tag, name)) throw new RenderError(`Attribute ${name} is not allowed on <${tag}>`)
     if (value === null || value === undefined || value === false) continue
     if (value === true) { out += ` ${name}`; continue }
     let text = String(value)
+    if (output && name === 'style') {
+      text = output.style(text)
+      if (text === '') continue
+    }
+    if (output && name === 'class') {
+      const profile = output
+      text = text.split(/\s+/).filter((c) => c !== '' && !profile.dropClass(c)).join(' ')
+      if (text === '') continue
+    }
     if (URL_ATTRS.has(name)) {
       const safe = safeUrl(text)
       if (safe === null) continue

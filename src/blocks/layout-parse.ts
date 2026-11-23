@@ -22,11 +22,22 @@ export const layoutParse: Readonly<Record<string, readonly ParseRule[]>> = {
   } }],
   [COLUMN]: [{ selector: COLUMN_SELECTOR, priority: 100, parse: (el) => ({ attrs: {}, children: el.childNodes }) }],
   [GROUP]: [{ selector: '.pz-group, .wp-block-group', priority: 100, parse: (el, ctx) => {
-    const tag = el.localName === 'section' || el.localName === 'aside' ? el.localName : 'div'
+    const tag = el.localName === 'section' || el.localName === 'aside' || el.localName === 'article' ? el.localName : 'div'
     // A WordPress group wraps its content once more.
     const inner = el.querySelector(':scope > .wp-block-group__inner-container') ?? el
     return { attrs: { ...ctx.supports(el), tag, look: classValue(el, 'pz-look-', ['panel', 'line']) ?? (el.classList.contains('has-background') ? 'panel' : '') }, children: inner.childNodes }
-  } }],
+  } }, {
+    // Legacy HTML (decision 0020): a box with the host's class or style is a group, not just its content.
+    selector: 'div, section, article, aside',
+    priority: 10,
+    parse: (el, ctx) => {
+      if (!ctx.legacy) return null
+      const supports = ctx.supports(el)
+      if (!supports.htmlClass && !supports.htmlStyle) return null
+      const bare = ![...el.childNodes].some((n) => ctx.blockish(n))
+      return { attrs: { ...supports, tag: el.localName === 'div' ? 'div' : el.localName, ...(bare ? { bare: true } : {}) }, children: el.childNodes }
+    },
+  }],
   [DETAILS]: [{ selector: 'details:not(.pz-transcript):not(.pz-embed-facade)', priority: 60, parse: (el, ctx) => {
     const summary = el.querySelector(':scope > summary')
     const body = el.querySelector(':scope > .pz-details-body')

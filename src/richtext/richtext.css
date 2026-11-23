@@ -23,3 +23,14 @@
 @media (forced-colors: active) {
   ::highlight(pz-boundary) { background-color: Highlight; color: HighlightText; }
 }
+
+/* Legacy markup without text of its own: a named anchor shows as a small flag, an empty icon as its box until the host's stylesheet draws it. */
+.pz-richtext [data-pz-object="anchor"] {
+  display: inline-block; inline-size: .45em; block-size: .8em; margin-inline: 1px; vertical-align: -.05em;
+  border-inline-start: 2px solid var(--pz-edge, #8A8B96); border-block-start: .3em solid var(--pz-edge, #8A8B96);
+  cursor: default;
+}
+.pz-richtext :is([data-pz-object="icon"], [data-pz-object="marker"]):empty {
+  display: inline-block; min-inline-size: .8em; block-size: .8em; vertical-align: -.05em;
+  outline: 1px dashed var(--pz-edge, #8A8B96); outline-offset: -1px; border-radius: 2px;
+}

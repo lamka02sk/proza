@@ -11,10 +11,13 @@ import {
   OBJECT_CHAR, checkFormatAttrs, defaultFormats, dropOrphanObjects, formatAttrs, normalize, toTree,
   type FormatAttrs, type FormatRange, type FormatRegistry, type FormatSpec, type RichNode, type RichTextValue,
 } from '../model/richtext'
+import { parseStyle } from '../model/css'
 import { safeUrl } from '../model/url'
 
 const PAD = 'data-pz-pad'
 const NOTE = 'data-pz-note'
+/** A legacy format's `style`, as the model has it: the field sets the declarations through the CSSOM, which a strict CSP allows. */
+const STYLE = 'data-pz-style'
 
 // ---------------------------------------------------------------------------
 // Value to DOM
@@ -76,7 +79,19 @@ function createFormatElement(range: FormatRange, doc: Document, registry: Format
     el.setAttribute('aria-label', labels.footnote(note))
     return el
   }
-  for (const [name, v] of Object.entries(formatAttrs(spec, range))) el.setAttribute(name, v)
+  for (const [name, v] of Object.entries(formatAttrs(spec, range))) {
+    if (name !== 'style') { el.setAttribute(name, v); continue }
+    el.setAttribute(STYLE, v)
+    if (el instanceof HTMLElement) for (const [prop, value] of parseStyle(v)) el.style.setProperty(prop, value)
+  }
+  // An object without content of its own (a named anchor, an icon) is one character the caret passes over.
+  if (spec.object && spec.tag !== 'img') el.setAttribute('contenteditable', 'false')
+  if (spec.object && spec.type !== 'image') {
+    el.setAttribute('data-pz-object', spec.type)
+    // Markers of legacy markup (a named anchor, an icon) have no text on the page either.
+    el.setAttribute('aria-hidden', 'true')
+    if (spec.type === 'anchor') el.setAttribute('title', `#${range.attrs?.name ?? ''}`)
+  }
   return el
 }
 
@@ -175,7 +190,9 @@ function formatOf(el: Element, registry: FormatRegistry): { type: string; attrs?
       const prefix = `pz-${spec.type}-`
       const v = spec.type === 'footnote' && name === 'note' ? el.getAttribute(NOTE)
         : rule.kind === 'preset' ? [...el.classList].find((c) => c.startsWith(prefix))?.slice(prefix.length) ?? null
-          : el.getAttribute(name)
+          : rule.kind === 'style' ? el.getAttribute(STYLE)
+            : rule.kind === 'classes' ? [...el.classList].filter((c) => !c.startsWith('pz-')).join(' ') || null
+              : el.getAttribute(name)
       if (v !== null) raw[name] = v
     }
     const attrs = checkFormatAttrs(spec.type, raw, registry)

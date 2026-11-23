@@ -3,6 +3,7 @@
  *
  * Every function here is pure and returns a normalized value. No DOM.
  */
+import { CLASS_LIST, cleanStyle } from './legacy'
 import { safeUrl } from './url'
 
 export type FormatAttrs = Readonly<Record<string, string>>
@@ -44,6 +45,12 @@ export type FormatAttrRule =
   /** Positive integer, such as an image dimension in CSS pixels. */
   | { readonly kind: 'size'; readonly required?: boolean }
   | { readonly kind: 'enum'; readonly values: readonly string[]; readonly required?: boolean }
+  /** Inline CSS declarations with safe values (legacy HTML), rendered as `style`; the host's policy narrows them on output. */
+  | { readonly kind: 'style'; readonly required?: boolean }
+  /** Class names (legacy HTML), added to the element's classes; the host's policy narrows them on output. */
+  | { readonly kind: 'classes'; readonly required?: boolean }
+  /** An HTML name or id (`<a name>`). */
+  | { readonly kind: 'name'; readonly required?: boolean }
 
 export interface FormatSpec {
   readonly type: string
@@ -80,6 +87,7 @@ export const OBJECT_CHAR = '\uFFFC'
 export const LANG_PATTERN = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{1,8})*$/
 const PRESET_PATTERN = /^[a-z][a-z0-9-]{0,39}$/
 const SIZE_PATTERN = /^[1-9]\d{0,4}$/
+const NAME_PATTERN = /^[A-Za-z][\w:.-]{0,99}$/
 const TEXT_MAX = 10_000
 /** Names of format types: what loaded JSON and the clipboard may carry. */
 export const FORMAT_TYPE = /^[a-z][a-z0-9-]{0,63}$/
@@ -116,6 +124,32 @@ export const defaultFormats: FormatRegistry = new Map([
   spec({ type: 'footnote', tag: 'sup', priority: 91, inclusive: false, object: true, ownLink: true, className: 'pz-fn', attrs: { note: { kind: 'text', required: true } } }),
 ])
 
+/**
+ * Formats of legacy HTML (decision 0020), joined to the standard ones when a host
+ * keeps legacy markup: a span with the source's classes and styles, a named anchor, an empty
+ * icon element, a word break opportunity, and links and pictures with their title, classes and styles.
+ */
+export function legacyFormats(base: FormatRegistry = defaultFormats): FormatRegistry {
+  const out = new Map(base)
+  const extend = (type: string, attrs: Readonly<Record<string, FormatAttrRule>>): void => {
+    const s = out.get(type)
+    if (s) out.set(type, { ...s, attrs: { ...s.attrs, ...attrs } })
+  }
+  extend('link', { title: { kind: 'text', maxLength: 1_000 }, class: { kind: 'classes' } })
+  extend('image', { title: { kind: 'text', maxLength: 1_000 }, class: { kind: 'classes' }, style: { kind: 'style' } })
+  for (const s of LEGACY_FORMATS) if (!out.has(s.type)) out.set(s.type, s)
+  return out
+}
+
+const LEGACY_FORMATS: readonly FormatSpec[] = [
+  { type: 'span', tag: 'span', priority: 37, inclusive: true, attrs: { class: { kind: 'classes' }, style: { kind: 'style' } } },
+  { type: 'anchor', tag: 'a', priority: 92, inclusive: false, object: true, ownLink: true, attrs: { name: { kind: 'name', required: true } } },
+  { type: 'icon', tag: 'i', priority: 93, inclusive: false, object: true, attrs: { class: { kind: 'classes', required: true } } },
+  { type: 'marker', tag: 'span', priority: 94, inclusive: false, object: true, attrs: { class: { kind: 'classes', required: true } } },
+  // Where a long word may break.
+  { type: 'wbr', tag: 'wbr', priority: 95, inclusive: false, object: true },
+]
+
 /** One attribute value after its rule, or null when it fails. */
 export function checkFormatAttr(rule: FormatAttrRule, value: unknown): string | null {
   if (typeof value !== 'string') return null
@@ -127,6 +161,13 @@ export function checkFormatAttr(rule: FormatAttrRule, value: unknown): string | 
     case 'lang': return value.length <= 35 && LANG_PATTERN.test(value) ? value : null
     case 'size': return SIZE_PATTERN.test(value) ? value : null
     case 'enum': return rule.values.includes(value) ? value : null
+    case 'style': {
+      if (value.length > 2000) return null
+      const clean = cleanStyle(value)
+      return clean === '' ? null : clean
+    }
+    case 'classes': return value.length <= 2000 && CLASS_LIST.test(value) ? value : null
+    case 'name': return NAME_PATTERN.test(value) ? value : null
   }
 }
 
@@ -164,6 +205,7 @@ export function formatAttrs(spec: FormatSpec, range: FormatRange): Record<string
     const v = range.attrs?.[name]
     if (v === undefined || checkFormatAttr(rule, v) === null) continue
     if (rule.kind === 'preset') classes.push(`pz-${spec.type}-${v}`)
+    else if (rule.kind === 'classes') classes.push(v)
     else attrs[name] = v
   }
   // A page opened in a new window must not reach back through window.opener.
@@ -264,7 +306,8 @@ export function normalize(value: RichTextValue, registry: FormatRegistry = defau
   for (const [type, ranges] of byType) {
     // Painted over the segments between this type's own boundaries, never over every character:
     // a type costs its ranges, so many types over a long text stay linear.
-    const holes = registry.get(type)?.tag === 'a' ? ownLinks : []
+    // Links leave holes; an object that is a link itself (a named anchor) does not punch one in itself.
+    const holes = registry.get(type)?.tag === 'a' && registry.get(type)?.object !== true ? ownLinks : []
     const bounds = new Set<number>()
     for (const r of ranges) { bounds.add(r.start); bounds.add(r.end) }
     for (const at of holes) { bounds.add(at); bounds.add(at + 1) }

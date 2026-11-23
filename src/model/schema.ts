@@ -9,6 +9,7 @@ import {
   type FormatRange, type FormatRegistry, type RichTextValue, FORMAT_TYPE, LANG_PATTERN, MAX_UNKNOWN_TYPES, checkFormatAttrs, defaultFormats,
   dropOrphanObjects, formatTypeGate, normalize,
 } from './richtext'
+import { CLASS_LIST, STYLE_PATTERN } from './legacy'
 import { type Attrs, type Block, ID_PATTERN, createId } from './tree'
 import { safeSrcset, safeUrl } from './url'
 
@@ -16,9 +17,10 @@ import { safeSrcset, safeUrl } from './url'
 // Attribute specs
 
 export type AttrSpec =
-  | { readonly type: 'string'; readonly default?: string; readonly pattern?: RegExp; readonly maxLength?: number }
+  /** `sparse`: stored only when it differs from the default, so documents without it serialise as before. */
+  | { readonly type: 'string'; readonly default?: string; readonly pattern?: RegExp; readonly maxLength?: number; readonly sparse?: boolean }
   | { readonly type: 'number'; readonly default?: number; readonly min?: number; readonly max?: number; readonly integer?: boolean }
-  | { readonly type: 'boolean'; readonly default?: boolean }
+  | { readonly type: 'boolean'; readonly default?: boolean; readonly sparse?: boolean }
   | { readonly type: 'enum'; readonly values: readonly (string | number)[]; readonly default?: string | number }
   /** Passes the protocol allow-list. Empty means none. */
   | { readonly type: 'url'; readonly default?: string }
@@ -110,10 +112,14 @@ const SUPPORT_ATTRS = {
  * - `lock`: `move` keeps the part in place (no moving, no removing); `all` also keeps
  *   its content and everything inside from changing (TinyMCE `noneditable`).
  * - `variant`: a style the host defines for the type (TinyMCE `importcss`), the class `pz-style-<name>`.
+ * - `htmlStyle` and `htmlClass`: the inline CSS and the host's classes of legacy HTML (decision 0020),
+ *   rendered only when the host keeps legacy markup, through its policy.
  */
 export const COMMON_ATTRS = {
   lock: { type: 'enum', values: ['', 'move', 'all'] },
   variant: { type: 'string', pattern: /^[a-z][a-z0-9-]{0,39}$/, maxLength: 40 },
+  htmlStyle: { type: 'string', pattern: STYLE_PATTERN, maxLength: 2000 },
+  htmlClass: { type: 'string', pattern: CLASS_LIST, maxLength: 2000 },
 } as const satisfies AttrSpecs
 
 /** Every attribute of a block type: the common ones, its own, and those its supports add. */
@@ -234,18 +240,24 @@ export function validateDoc(input: unknown, registry: SchemaRegistry, options: V
 export function serializeDoc(doc: Doc, registry: SchemaRegistry): StoredDoc {
   const out = (blocks: readonly Block[]): StoredBlock[] => blocks.map((b) => {
     if (b.type === UNSUPPORTED) return (b.attrs as unknown as UnsupportedAttrs).original as StoredBlock
-    const version = registry.get(b.type)?.version ?? 1
-    const attrs = b.attrs.lock === '' || b.attrs.variant === '' ? sparse(b.attrs) : b.attrs
+    const schema = registry.get(b.type)
+    const version = schema?.version ?? 1
+    const attrs = sparse(b.attrs, schema)
     const stored: StoredBlock = version === 1 ? { id: b.id, type: b.type, attrs } : { id: b.id, type: b.type, version, attrs }
     return b.children ? { ...stored, children: out(b.children) } : stored
   })
   return { version: DOC_VERSION, blocks: out(doc.blocks) }
 }
 
-/** Attributes without the common ones that are not set. */
-function sparse(attrs: Attrs): Attrs {
+/** Attributes without the common ones that are not set, and without sparse ones at their default. */
+function sparse(attrs: Attrs, schema: BlockSchema | undefined): Attrs {
   const out: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(attrs)) if (!(k in COMMON_ATTRS && v === '')) out[k] = v
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k in COMMON_ATTRS && v === '') continue
+    const spec = schema?.attrs[k]
+    if (spec && 'sparse' in spec && spec.sparse && v === defaultValue(spec)) continue
+    out[k] = v
+  }
   return out
 }
 

@@ -9,6 +9,8 @@
  */
 import { type InjectionKey, type PropType, type VNode, computed, defineComponent, getCurrentInstance, h, inject, onBeforeUnmount, onMounted, onUpdated, ref } from 'vue'
 import { type Editor, fieldKey } from '../editor/editor'
+import { parseStyle } from '../model/css'
+import { cleanStyle, keepClasses } from '../model/legacy'
 import { type ParentId, childrenOf, parentOf } from '../model/tree'
 import { supportClasses } from '../render/render'
 import type { RichTextField } from '../richtext/field'
@@ -34,6 +36,17 @@ export interface WrapperProps {
   readonly 'aria-label'?: string
   readonly 'aria-describedby'?: string
   readonly contenteditable?: 'false'
+  /** A legacy part's own look (decision 0020), set through the CSSOM. */
+  readonly style?: Readonly<Record<string, string>>
+}
+
+/** A legacy part's style and classes as the canvas shows them, by the same policy the page uses. */
+function legacyLook(editor: Editor, attrs: Readonly<Record<string, unknown>>): { style?: Record<string, string>; classes: string[] } {
+  const rules = editor.legacy
+  if (!rules) return { classes: [] }
+  const css = cleanStyle(typeof attrs.htmlStyle === 'string' ? attrs.htmlStyle : '', rules.style)
+  const cls = keepClasses(typeof attrs.htmlClass === 'string' ? attrs.htmlClass : '', rules.className)
+  return { ...(css !== '' ? { style: Object.fromEntries(parseStyle(css)) } : {}), classes: cls === '' ? [] : cls.split(' ') }
 }
 
 /** The children of a container (or of the document), in order. */
@@ -72,10 +85,12 @@ export const BlockView = defineComponent({
       // text of their own stay out of it, so their controls work and the selection passes over them.
       // Only these read \`spanning\`, so text parts do not re-render when it changes.
       const island = (!def || def.fields.length === 0 || def.group === true) && !(editor.tree.children.get(n.id)?.length) ? editor.spanning.value : false
+      const look = legacyLook(editor, n.attrs)
       const wrapper: WrapperProps = {
         'data-block': n.id,
         'data-type': n.type,
-        class: ['pz-block', selected && 'is-selected', editor.isCurrent(n.id) && 'is-current', n.attrs.lock === 'move' || n.attrs.lock === 'all' ? 'is-locked' : false, `pz-t-${n.type.replace(/^core\//, '')}`, ...supportClasses(n.attrs, parentOf(editor.tree, n.id) === null)],
+        class: ['pz-block', selected && 'is-selected', editor.isCurrent(n.id) && 'is-current', n.attrs.lock === 'move' || n.attrs.lock === 'all' ? 'is-locked' : false, `pz-t-${n.type.replace(/^core\//, '')}`, ...supportClasses(n.attrs, parentOf(editor.tree, n.id) === null), ...look.classes],
+        ...(look.style ? { style: look.style } : {}),
         tabindex: editor.isTabStop(n.id) ? 0 : -1,
         ...(named ? { 'aria-label': editor.labelFor(n), 'aria-describedby': ACTIONS_ID } : {}),
         ...(island ? { contenteditable: 'false' } : {}),

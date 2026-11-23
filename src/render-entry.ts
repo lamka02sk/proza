@@ -6,7 +6,8 @@
  */
 export { RENDER_LABELS, render, renderBlocks, renderLabels, slug, type RenderLabels, type RenderOptions, type RenderableBlock, type RenderContext, type RenderRegistry, type Share } from './render/render'
 export { type Html, type HtmlAttrs, type Child, ALLOWED, GLOBAL_ATTRS, h, fragment, cx, EMPTY_HTML, RenderError } from './render/html'
-export { EMBED_FRAME, type SanitizerPolicy, sanitizeElement, sanitizerPolicy } from './render/sanitize'
+export { EMBED_FRAME, type LegacySanitizerPolicy, type SanitizeOptions, type SanitizerPolicy, sanitizeElement, sanitizerPolicy } from './render/sanitize'
+export { FRAME_SANDBOX, LEGACY_STYLES, type LegacyFrame, type LegacyPolicy, cleanStyle } from './model/legacy'
 export { coreRegistry, coreSchemas } from './blocks/core'
 export { defineSchema } from './blocks/define'
 export {
@@ -15,7 +16,7 @@ export {
   DOC_VERSION, DocumentVersionError, MAX_DEPTH, MAX_FORMATS, UNSUPPORTED, blockRegistry, serializeDoc, validateDoc,
 } from './model/schema'
 export { type Block, type Attrs } from './model/tree'
-export { type FormatRange, type FormatSpec, type RichTextValue, defaultFormats } from './model/richtext'
+export { type FormatRange, type FormatSpec, type RichTextValue, defaultFormats, legacyFormats } from './model/richtext'
 export { MAX_URL, safeSrcset, safeUrl } from './model/url'
 export { type EmbedProvider, embedProviders, isPlayerUrl, registerEmbedProvider } from './model/embeds'
 export { type Token, tokenize } from './render/highlight'

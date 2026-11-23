@@ -17,7 +17,8 @@ import { type ImportReport, type ImportSource } from '../import/report'
 import type { ImportBlock } from '../import/rules'
 import type { PaletteEntry } from '../import/style'
 import { type TreeChanges, treeChanges } from '../model/changes'
-import { embedFor } from '../model/embeds'
+import { embedFor, isPlayerUrl } from '../model/embeds'
+import { type LegacyPolicy, type LegacyRules, legacyRules } from '../model/legacy'
 import { type History, emptyHistory, record, redo as redoHistory, transact, undo as undoHistory, type Origin, type Typing } from '../model/history'
 import { type Operation, applyOperations } from '../model/operations'
 import { type FormatRegistry, type Mark, type RichTextValue, defaultFormats, findChange, slice, deleteRange, replace as replaceText } from '../model/richtext'
@@ -83,6 +84,12 @@ export interface EditorOptions {
    * saves and says how many are left; `block` does not save, and the interface shows them.
    */
   readonly onSave?: 'warn' | 'block'
+  /**
+   * Keep legacy HTML (decision 0020): HTML content and the source view import with its styles,
+   * classes and frames as the policy says, and `getHTML()` writes them back. Pasted content is
+   * still converted to clean parts. `formats` must include `legacyFormats()`.
+   */
+  readonly legacy?: LegacyPolicy | true
 }
 
 /** A checker finding in words, as `validate()` returns it to the host. */
@@ -251,6 +258,10 @@ export class Editor implements CommandHost {
   readonly #offered: ReadonlySet<string> | null
   readonly #enabled: ReadonlySet<string>
   readonly #rawHtml: ((html: string) => string | null) | null
+  readonly #legacy: LegacyPolicy | true | null
+  /** The legacy policy compiled, when the host keeps legacy HTML. */
+  /** @internal */
+  readonly legacy: LegacyRules | null
   /** The code highlighter once loaded (lazy), for `getHTML()` and the canvas. */
   /** @internal */
   readonly highlighter = shallowRef<typeof import('../render/highlight') | null>(null)
@@ -303,6 +314,8 @@ export class Editor implements CommandHost {
     this.#offered = options.preset ? new Set([...options.preset.blocks, ...options.preset.formats]) : null
     this.#enabled = new Set(options.enable ?? [])
     this.#rawHtml = options.rawHtml ?? null
+    this.#legacy = options.legacy ?? null
+    this.legacy = options.legacy ? legacyRules(options.legacy) : null
     this.formats = options.formats ?? defaultFormats
     this.strings = options.strings ?? en
     this.commands = commandRegistry([...CORE_COMMANDS, ...(options.commands ?? [])])
@@ -358,6 +371,7 @@ export class Editor implements CommandHost {
     const raw = this.#rawHtml ?? ([...this.editing.values()].some((d) => d.offByDefault && this.#enabled.has(d.name)) ? (s: string) => s : null)
     return renderBlocks(blocksFromTree(this.#tree), this.registry, {
       formats: this.formats, labels: renderLabels(this.contentLanguage), ...(hl ? { highlight: hl.tokenize } : {}), ...(raw ? { rawHtml: raw } : {}),
+      ...(this.#legacy ? { legacy: this.#legacy } : {}),
     })
   }
 
@@ -374,8 +388,15 @@ export class Editor implements CommandHost {
     const raw = this.#rawHtml ?? (on ? (s: string) => { frames.push(s); return '' } : null)
     const html = renderBlocks(blocksFromTree(this.#tree), this.registry, {
       formats: this.formats, labels: renderLabels(this.contentLanguage), ...(hl ? { highlight: hl.tokenize } : {}), ...(raw ? { rawHtml: raw } : {}),
+      ...(this.#legacy ? { legacy: this.#legacy } : {}),
     })
     return { html, frames }
+  }
+
+  /** A frame from `src` is published as a frame: an embed provider's player, or a site the legacy policy lists. */
+  /** @internal */
+  frameAllowed(src: string): boolean {
+    return (this.legacy !== null && (this.legacy.frame(src) !== undefined || (embedFor(src) !== null && /^https:/i.test(src.trim())))) || isPlayerUrl(src)
   }
 
   /** Load the code highlighter, once; the code blocks ask for it when they have a language. */
@@ -395,7 +416,7 @@ export class Editor implements CommandHost {
     let json = content
     let imported: ImportResult | null = null
     if (typeof content === 'string') {
-      imported = this.importHtml(content, this.#contentSource ? { source: this.#contentSource } : {})
+      imported = this.importHtml(content, { ...(this.#contentSource ? { source: this.#contentSource } : {}), ...(this.#legacy ? { legacy: this.#legacy } : {}) })
       json = serializeDoc({ version: DOC_VERSION, blocks: imported.blocks }, this.registry)
     }
     const { doc, issues } = validateDoc(json, this.registry, { formats: this.formats, createId: this.#createId })
@@ -442,7 +463,7 @@ export class Editor implements CommandHost {
   // Import
 
   /** Foreign HTML as blocks, with the report and the pictures still to upload. Changes nothing. */
-  importHtml(html: string, options: Pick<ImportOptions, 'source' | 'rtf' | 'notes'> = {}): ImportResult {
+  importHtml(html: string, options: Pick<ImportOptions, 'source' | 'rtf' | 'notes' | 'legacy'> = {}): ImportResult {
     return importHtml(html, this.#importBlocks, { formats: this.formats, createId: this.#createId, ...this.#importSettings, ...options })
   }
 
@@ -453,7 +474,7 @@ export class Editor implements CommandHost {
 
   /** Replace the document with HTML (the source view) as one undo step, and report what the import did. */
   replaceHtml(html: string, announce = ''): ImportResult {
-    const result = this.importHtml(html)
+    const result = this.importHtml(html, this.#legacy ? { legacy: this.#legacy } : {})
     this.#replaceAll(result.blocks, announce)
     this.#imported('source', result)
     return result

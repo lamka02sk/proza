@@ -24,10 +24,11 @@ const MARKERS: readonly (readonly [ImportSource, RegExp])[] = [
   ['tinymce', /\bdata-mce-[a-z-]{1,40}=|\bclass=["']?[^"'<>=]*\bmce-[a-z]/i],
 ]
 
-/** The source of `html`, or `html` when nothing marks it. */
-export function detectSource(html: string): ImportSource {
+/** The source of `html`, or `html` when nothing marks it. `notProza`: Proza's own markers do not count (legacy output reads as plain HTML). */
+export function detectSource(html: string, notProza = false): ImportSource {
   // Markers sit near the start (meta tags, the outer wrapper) or anywhere in the markup; the whole string is cheap enough to scan.
   for (const [source, pattern] of MARKERS) {
+    if (notProza && source === 'proza') continue
     if (!pattern.test(html)) continue
     // Calc also writes data-sheets-value on text cells for compatibility.
     return source === 'google-sheets' && LIBREOFFICE.test(html) ? 'libreoffice-calc' : source

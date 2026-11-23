@@ -8,6 +8,7 @@
  * allow-list, sandboxed, in an aspect-ratio box (classes, no inline styles).
  */
 import { embedFor } from '../model/embeds'
+import { CLASS_LIST, STYLE_PATTERN } from '../model/legacy'
 import { LANG_PATTERN } from '../model/richtext'
 import { EMPTY_HTML, type Html, cx, fragment, h } from '../render/html'
 import { EMBED_FRAME } from '../render/sanitize'
@@ -21,6 +22,7 @@ export const VIDEO = 'core/video'
 export const AUDIO = 'core/audio'
 export const EMBED = 'core/embed'
 export const FILE = 'core/file'
+export const FRAME = 'core/frame'
 
 const PIXELS = { type: 'number', integer: true, min: 0, max: 100_000 } as const
 
@@ -75,6 +77,9 @@ export const image = defineSchema({
     srcset: { type: 'srcset' },
     href: { type: 'url' },
     caption: { type: 'richtext' },
+    /** The `<img>`'s own style and classes in legacy HTML (decision 0020); the figure's are the common `style` and `className`. */
+    imgStyle: { type: 'string', pattern: STYLE_PATTERN, maxLength: 2000, sparse: true },
+    imgClass: { type: 'string', pattern: CLASS_LIST, maxLength: 2000, sparse: true },
   },
   supports: { anchor: true, align: true, bleed: true },
   render: (b, ctx) => {
@@ -92,6 +97,7 @@ export const image = defineSchema({
       sizes: a.srcset === '' ? null : imageSizes(inGallery ? 'l' : a.width, ctx.share, ctx.measure, ctx.parent === null ? supportAttr(b.attrs, 'bleed') : ''),
       loading: 'lazy',
       decoding: 'async',
+      ...ctx.legacyAttrs(a.imgStyle, a.imgClass),
     })
     return h('figure', ctx.wrapper({ class: cx('pz-image', !inGallery && `pz-width-${a.width}`) }),
       a.href === '' ? img : h('a', { href: a.href }, img),
@@ -201,6 +207,46 @@ export const embed = defineSchema({
   },
 })
 
+/** A frame size as HTML writes it: pixels, or a percentage of the column. */
+const FRAME_SIZE = /^(?:[1-9]\d{0,4}|(?:100|[1-9]\d?)%)$/
+
+/**
+ * A frame from a site the host lists (legacy HTML, decision 0020): a map, a
+ * form, a calendar. Off by default; its markup is the source's, sandboxed as the
+ * host says. Where the site is not allowed (no legacy policy, or not listed) it is a link.
+ */
+export const frame = defineSchema({
+  name: FRAME,
+  attrs: {
+    src: { type: 'url' },
+    /** Accessible name of the frame (WCAG 4.1.2): what it shows. */
+    title: { type: 'string', maxLength: 300 },
+    width: { type: 'string', pattern: FRAME_SIZE, maxLength: 6 },
+    height: { type: 'string', pattern: FRAME_SIZE, maxLength: 6 },
+    /** Features the frame may use (`allow`): a permissions policy list. */
+    allow: { type: 'string', pattern: /^[\w\-;:/.'* ]*$/, maxLength: 500 },
+    allowFullscreen: { type: 'boolean' },
+    frameBorder: { type: 'enum', values: ['', '0', '1'] },
+  },
+  supports: { anchor: true },
+  render: (b, ctx) => {
+    const a = b.attrs
+    if (a.src === '') return EMPTY_HTML
+    const sandbox = ctx.frame(a.src)
+    if (sandbox === undefined) return h('p', ctx.wrapper(), h('a', { href: a.src }, a.title === '' ? a.src : a.title))
+    return h('iframe', ctx.wrapper({
+      src: a.src,
+      title: a.title === '' ? null : a.title,
+      width: a.width === '' ? null : a.width,
+      height: a.height === '' ? null : a.height,
+      allow: a.allow === '' ? null : a.allow,
+      allowfullscreen: a.allowFullscreen,
+      ...(ctx.legacy && a.frameBorder !== '' ? { frameborder: a.frameBorder } : {}),
+      sandbox,
+    }))
+  },
+})
+
 /** "PDF" from `report.pdf`, or "" when the name has no extension. */
 export function fileType(name: string): string {
   // The query and fragment cut off first: a pattern spanning them backtracked over long addresses.
@@ -235,4 +281,4 @@ export function decodeName(href: string): string {
   try { return decodeURIComponent(last) } catch { return last }
 }
 
-export const mediaBlocks = [image, gallery, video, audio, embed, file] as const
+export const mediaBlocks = [image, gallery, video, audio, embed, file, frame] as const
